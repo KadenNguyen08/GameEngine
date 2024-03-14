@@ -1,4 +1,6 @@
-
+'''health bar
+   game over
+   damage'''
 import pygame as pg
 from settings import *
 from sprites import *
@@ -43,7 +45,6 @@ class Game:
         # create timer
 
         self.cooldown = Timer(self)
-        self.testclass = Test()
         print("create new game...")
         self.all_sprites = pg.sprite.Group()
         self.walls = pg.sprite.Group()
@@ -74,7 +75,6 @@ class Game:
 
     def run(self):
         # start playing sound on infinite loop (loops=-1)
-        pg.mixer.music.play(loops=-1)
         self.playing = True
         while self.playing:
             self.dt = self.clock.tick(FPS) / 1000
@@ -130,6 +130,10 @@ class Game:
         self.draw_text(self.screen, "This is the start screen - press any key to play", 24, WHITE, WIDTH/2, HEIGHT/2)
         pg.display.flip()
         self.wait_for_key()
+
+
+        
+
     
     def wait_for_key(self):
         waiting = True
@@ -141,6 +145,8 @@ class Game:
                     self.quit()
                 if event.type == pg.KEYUP:
                     waiting = False
+
+    
 # Instantiate the game... 
 g = Game()
 # use game method run to run
