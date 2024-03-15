@@ -3,6 +3,7 @@ from settings import *
 from utils import *
 from random import choice
 
+
 vec =pg.math.Vector2
 
 def collide_with_walls(sprite, group, dir):

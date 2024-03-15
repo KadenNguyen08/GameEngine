@@ -23,6 +23,7 @@ class Game:
         # setting game clock 
         self.clock = pg.time.Clock()
         self.load_data()
+        self.playing = True
         # added images folder and image in the load_data method for use with the player
     def load_data(self):
         game_folder = path.dirname(__file__)
@@ -88,6 +89,8 @@ class Game:
         # tick the test timer
         self.cooldown.ticking()
         self.all_sprites.update()
+        if self.play.hitpoints < 1:
+            self.playing = False
     
     def draw_grid(self):
          for x in range(0, WIDTH, TILESIZE):
@@ -111,6 +114,7 @@ class Game:
             self.draw_text(self.screen, str(self.cooldown.current_time), 24, WHITE, WIDTH/2 - 32, 2)
             self.draw_text(self.screen, str(self.cooldown.event_time), 24, WHITE, WIDTH/2 - 32, 80)
             self.draw_text(self.screen, str(self.cooldown.get_countdown()), 24, WHITE, WIDTH/2 - 32, 120)
+            self.draw_text(self.screen, str(self.hitpoints.()), 24, WHITE, WIDTH/2 -32, 120)
             pg.display.flip()
     def events(self):
          for event in pg.event.get():
@@ -128,6 +132,13 @@ class Game:
     def show_start_screen(self):
         self.screen.fill(BGCOLOR)
         self.draw_text(self.screen, "This is the start screen - press any key to play", 24, WHITE, WIDTH/2, HEIGHT/2)
+        pg.display.flip()
+        self.wait_for_key()
+    def show_go(screen):
+        if not self.playing:
+            return
+        self.screen.fill(BGCOLOR)
+        self.draw_text(self.screen, "This is the Go screen - press any key to play", 24, WHITE, WIDTH/2, HEIGHT/2)
         pg.display.flip()
         self.wait_for_key()
 
@@ -151,6 +162,7 @@ class Game:
 g = Game()
 # use game method run to run
 g.show_start_screen()
+g.show_go_screen()
 while True:
     g.new()
     g.run()
