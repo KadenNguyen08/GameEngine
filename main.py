@@ -1,5 +1,5 @@
 '''health bar
-   
+   Death Screen
    low health warning sign'''
 import pygame as pg
 from settings import *
@@ -55,6 +55,7 @@ class Game:
         self.power_ups = pg.sprite.Group()
         self.power_up2 = pg.sprite.Group()
         self.cactus = pg.sprite.Group()
+        self.player = pg.sprite.Group()
         # self.player1 = Player(self, 1, 1)
         # for x in range(10, 20):
         #     Wall(self, x, 5)
@@ -120,6 +121,9 @@ class Game:
             self.draw_text(self.screen, str(self.cooldown.event_time), 24, WHITE, WIDTH/2 - 32, 80)
             self.draw_text(self.screen, str(self.cooldown.get_countdown()), 24, WHITE, WIDTH/2 - 32, 120)
             self.draw_text(self.screen, str(self.player.hitpoints), 100, WHITE, WIDTH/2 - 400, 0)
+            if self.player.hitpoints <= 50:
+                self.draw_text(self.screen, str(self.player.hitpoints), 100, RED, WIDTH/2 - 400, 0)
+                self.draw_text(self.screen, str("Warning, Low Health"), 100, RED, WIDTH/2 - -100, 0)
             #Displays the player health here.
             pg.display.flip()
     def events(self):
@@ -140,6 +144,16 @@ class Game:
         self.draw_text(self.screen, "This is the start screen - press any key to play", 24, WHITE, WIDTH/2, HEIGHT/2)
         pg.display.flip()
         self.wait_for_key()
+    def show_go_screen(self):
+        if self.playing == False:
+            self.screen.fill(RED)
+            self.draw_text(self.screen, "You died", 24, WHITE, WIDTH/2, HEIGHT/2)
+            pg.display.flip()
+            self.wait_for_key()
+    
+
+
+
 
 
 
@@ -162,6 +176,7 @@ class Game:
 g = Game()
 
 g.show_start_screen()
+
 while True:
     g.new()
     g.run()

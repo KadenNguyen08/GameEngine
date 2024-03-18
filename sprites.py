@@ -47,7 +47,7 @@ class Player(pg.sprite.Sprite):
         self.cooling = False
         self.pos = vec(0,0)
         print(self.hitpoints)
-    
+
     def get_keys(self):
         self.vx, self.vy = 0, 0 
         keys = pg.key.get_pressed()
