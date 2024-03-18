@@ -71,7 +71,6 @@ class Game:
                 if tile == 'C':
                     Coin(self, col, row)
                 if tile == 'M':
-                    Mob(self, col, row)
                     Mob2(self, col, row)
                 if tile == 'U':
                     PowerUp(self, col, row)
@@ -144,22 +143,6 @@ class Game:
         self.draw_text(self.screen, "This is the start screen - press any key to play", 24, WHITE, WIDTH/2, HEIGHT/2)
         pg.display.flip()
         self.wait_for_key()
-    def show_go_screen(self):
-        if self.playing == False:
-            self.screen.fill(RED)
-            self.draw_text(self.screen, "You died", 24, WHITE, WIDTH/2, HEIGHT/2)
-            pg.display.flip()
-            self.wait_for_key()
-    
-
-
-
-
-
-
-        
-
-    
     def wait_for_key(self):
         waiting = True
         while waiting:
@@ -176,6 +159,7 @@ class Game:
 g = Game()
 
 g.show_start_screen()
+
 
 while True:
     g.new()

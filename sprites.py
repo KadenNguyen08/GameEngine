@@ -101,30 +101,7 @@ class Player(pg.sprite.Sprite):
                     self.y = hits[0].rect.bottom
                 self.vy = 0
                 self.rect.y = self.y
-    def collide_with_cactus(self, dir):
-        if dir == 'x':
-            hits = pg.sprite.spritecollide(self, self.game.cactus, False)
-            if hits:
-                if self.vx > 0:
-                    self.x = hits[0].rect.left - self.rect.width
-                if self.vx < 0:
-                    self.x = hits[0].rect.right
-                self.vx = 0
-                self.rect.x = self.x
-                self.hitpoints -= 1
-                
-        if dir == 'y':
-            hits = pg.sprite.spritecollide(self, self.game.cactus, False)
-            if hits:
-                if self.vy > 0:
-                    self.y = hits[0].rect.top - self.rect.height
-                if self.vy < 0:
-                    self.y = hits[0].rect.bottom
-                self.vy = 0
-                self.rect.y = self.y
-                self.hitpoints -= 1
-              
-    
+
     # made possible by Aayush's question!
     def collide_with_group(self, group, kill):
         hits = pg.sprite.spritecollide(self, group, kill)
@@ -145,13 +122,18 @@ class Player(pg.sprite.Sprite):
           
                 if effect == "Invincible":
                     self.status = "Invincible"
-            if str(hits[0].__class__.__name__) == "Mob":
+            if str(hits[0].__class__.__name__) == "Mob2":
                 # print(hits[0].__class__.__name__)
                 # print("Collided with mob")
                 self.hitpoints -= 1
                 print(self.hitpoints)
                 if self.status == "Invincible":
                     print("you can't hurt me")
+            if str(hits[0].__class__.__name__) == "Cactus":
+                # print(hits[0].__class__.__name__)
+                # print("Collided with mob")
+                self.hitpoints -= 1
+ 
                     
 
                    
@@ -242,18 +224,7 @@ class Wall(pg.sprite.Sprite):
         self.y = y
         self.rect.x = x * TILESIZE
         self.rect.y = y * TILESIZE
-class Cactus(pg.sprite.Sprite):
-    def __init__(self, game, x, y):
-        self.groups = game.all_sprites, game.walls
-        pg.sprite.Sprite.__init__(self, self.groups)
-        self.game = game
-        self.image = pg.Surface((TILESIZE, TILESIZE))
-        self.image = game.cactus_img
-        self.rect = self.image.get_rect()
-        self.x = x
-        self.y = y
-        self.rect.x = x * TILESIZE
-        self.rect.y = y * TILESIZE
+
 
 class Coin(pg.sprite.Sprite):
     def __init__(self, game, x, y):
@@ -292,6 +263,27 @@ class PowerUp2(pg.sprite.Sprite):
         self.y = y
         self.rect.x = x * TILESIZE
         self.rect.y = y * TILESIZE
+class Cactus(pg.sprite.Sprite):
+    def __init__(self, game, x, y):
+        self.groups = game.all_sprites, game.mobs
+        pg.sprite.Sprite.__init__(self, self.groups)
+        self.game = game
+        self.image = pg.Surface((TILESIZE, TILESIZE))
+        self.image = game.cactus_img
+        self.rect = self.image.get_rect()
+        # self.image = game.mob_img
+        # self.image = pg.Surface((TILESIZE, TILESIZE))
+        # self.image.fill(ORANGE)
+        # self.hit_rect = MOB_HIT_RECT.copy()
+        # self.hit_rect.center = self.rect.center
+        self.pos = vec(x, y) * TILESIZE
+        self.vel = vec(0, 0)
+        self.acc = vec(0, 0)
+        self.rect.center = self.pos
+        self.rot = 0
+        # added
+        # self.health = MOB_HEALTH
+      
         
 class Mob(pg.sprite.Sprite):
     def __init__(self, game, x, y):
