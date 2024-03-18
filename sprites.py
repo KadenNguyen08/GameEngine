@@ -1,8 +1,9 @@
+
 import pygame as pg
 from settings import *
 from utils import *
 from random import choice
-
+import math
 
 vec =pg.math.Vector2
 
@@ -45,6 +46,7 @@ class Player(pg.sprite.Sprite):
         self.hitpoints = 100
         self.cooling = False
         self.pos = vec(0,0)
+        print(self.hitpoints)
     
     def get_keys(self):
         self.vx, self.vy = 0, 0 
@@ -99,6 +101,29 @@ class Player(pg.sprite.Sprite):
                     self.y = hits[0].rect.bottom
                 self.vy = 0
                 self.rect.y = self.y
+    def collide_with_cactus(self, dir):
+        if dir == 'x':
+            hits = pg.sprite.spritecollide(self, self.game.cactus, False)
+            if hits:
+                if self.vx > 0:
+                    self.x = hits[0].rect.left - self.rect.width
+                if self.vx < 0:
+                    self.x = hits[0].rect.right
+                self.vx = 0
+                self.rect.x = self.x
+                self.hitpoints -= 1
+                
+        if dir == 'y':
+            hits = pg.sprite.spritecollide(self, self.game.cactus, False)
+            if hits:
+                if self.vy > 0:
+                    self.y = hits[0].rect.top - self.rect.height
+                if self.vy < 0:
+                    self.y = hits[0].rect.bottom
+                self.vy = 0
+                self.rect.y = self.y
+                self.hitpoints -= 1
+              
     
     # made possible by Aayush's question!
     def collide_with_group(self, group, kill):
@@ -113,15 +138,22 @@ class Player(pg.sprite.Sprite):
                 self.cooling = True
                 print(effect)
                 print(self.cooling)
+            if str(hits[0].__class__.__name__) == "PowerUp2":
+                print(hits[0].__class__.__name__)
+                self.speed += 100
+                print(self.speed)
+          
                 if effect == "Invincible":
                     self.status = "Invincible"
             if str(hits[0].__class__.__name__) == "Mob":
-                print(hits[0].__class__.__name__)
-                print("Collided with mob")
+                # print(hits[0].__class__.__name__)
+                # print("Collided with mob")
                 self.hitpoints -= 1
+                print(self.hitpoints)
                 if self.status == "Invincible":
                     print("you can't hurt me")
-    
+                    
+
                    
                         
 
@@ -142,16 +174,12 @@ class Player(pg.sprite.Sprite):
         if not self.cooling:
             self.collide_with_group(self.game.power_ups, True)
         self.collide_with_group(self.game.mobs, False)
+    
           
         # coin_hits = pg.sprite.spritecollide(self.game.coins, True)
         # if coin_hits:
         #     print("I got a coin")
-    
-    def game_over(self):
-        if self.hitpoints == 0:
-            self.screen.fill(BGCOLOR)
-            self.draw_text(self.screen, "Game Over!", 24, WHITE, WIDTH/2, HEIGHT/2)
-            pg.display.flip()
+
 
 
         
@@ -174,6 +202,29 @@ class PewPew(pg.sprite.Sprite):
         # if hits:
         #     if str(hits[0].__class__.__name__) == "Coin":
         #         self.moneybag += 1
+    def collide_with_enemy(sprite, group, dir):
+        if dir == 'x':
+            hits = pg.sprite.spritecollide(sprite, group, False)
+            if hits:
+                if hits[0].rect.centerx > sprite.rect.centerx:
+                    sprite.pos.x = hits[0].rect.left - sprite.rect.width / 2
+                if hits[0].rect.centerx < sprite.rect.centerx:
+                    sprite.pos.x = hits[0].rect.right + sprite.rect.width / 2
+                sprite.vel.x = 0
+                sprite.rect.centerx = sprite.pos.x
+                Mob.mob_hitpoints -= 1
+                
+        if dir == 'y':
+            hits = pg.sprite.spritecollide(sprite, group, False)
+            if hits:
+                if hits[0].rect.centery > sprite.rect.centery:
+                    sprite.pos.y = hits[0].rect.top - sprite.rect.height / 2
+                if hits[0].rect.centery < sprite.rect.centery:
+                    sprite.pos.y = hits[0].rect.bottom + sprite.rect.height / 2
+                sprite.vel.y = 0
+                sprite.rect.centery = sprite.pos.y
+                Mob.mob_hitpoints -= 1
+
     def update(self):
         self.collide_with_group(self.game.coins, True)
         self.rect.y -= self.speed
@@ -186,6 +237,18 @@ class Wall(pg.sprite.Sprite):
         self.game = game
         self.image = pg.Surface((TILESIZE, TILESIZE))
         self.image.fill(BLUE)
+        self.rect = self.image.get_rect()
+        self.x = x
+        self.y = y
+        self.rect.x = x * TILESIZE
+        self.rect.y = y * TILESIZE
+class Cactus(pg.sprite.Sprite):
+    def __init__(self, game, x, y):
+        self.groups = game.all_sprites, game.walls
+        pg.sprite.Sprite.__init__(self, self.groups)
+        self.game = game
+        self.image = pg.Surface((TILESIZE, TILESIZE))
+        self.image = game.cactus_img
         self.rect = self.image.get_rect()
         self.x = x
         self.y = y
@@ -217,6 +280,18 @@ class PowerUp(pg.sprite.Sprite):
         self.y = y
         self.rect.x = x * TILESIZE
         self.rect.y = y * TILESIZE
+class PowerUp2(pg.sprite.Sprite):
+    def __init__(self, game, x, y):
+        self.groups = game.all_sprites, game.power_up2
+        pg.sprite.Sprite.__init__(self, self.groups)
+        self.game = game
+        self.image = pg.Surface((TILESIZE, TILESIZE))
+        self.image.fill(PURPLE)
+        self.rect = self.image.get_rect()
+        self.x = x
+        self.y = y
+        self.rect.x = x * TILESIZE
+        self.rect.y = y * TILESIZE
         
 class Mob(pg.sprite.Sprite):
     def __init__(self, game, x, y):
@@ -233,6 +308,9 @@ class Mob(pg.sprite.Sprite):
         self.x = x * TILESIZE
         self.y = y * TILESIZE
         self.speed = 1
+        self.mob_hitpoints = 100
+        if self.mob_hitpoints == 0:
+            self.cooling = True
     def collide_with_walls(self, dir):
         if dir == 'x':
             # print('colliding on the x')
@@ -246,6 +324,21 @@ class Mob(pg.sprite.Sprite):
             if hits:
                 self.vy *= -1
                 self.rect.y = self.y
+    def collide_with_cactus(self, dir):
+        if dir == 'x':
+            # print('colliding on the x')
+            hits = pg.sprite.spritecollide(self, self.game.cactus, False)
+            if hits:
+                self.vx *= -1
+                self.rect.x = self.x
+                self.mob_hitpoints -= 1
+        if dir == 'y':
+            # print('colliding on the y')
+            hits = pg.sprite.spritecollide(self, self.game.cactus, False)
+            if hits:
+                self.vy *= -1
+                self.rect.y = self.y
+                self.mob_hitpoints -= 1
     def update(self):
         # pass
         # # self.rect.x += 1
