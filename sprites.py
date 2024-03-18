@@ -133,6 +133,14 @@ class Player(pg.sprite.Sprite):
                 # print(hits[0].__class__.__name__)
                 # print("Collided with mob")
                 self.hitpoints -= 1
+            if str(hits[0].__class__.__name__) == "HealthBox":
+                # print(hits[0].__class__.__name__)
+                # print("Collided with mob")
+                self.hitpoints += 50
+            if str(hits[0].__class__.__name__) == "SpeedBoost":
+                # print(hits[0].__class__.__name__)
+                # print("Collided with mob")
+                self.speed += 20
  
                     
 
@@ -208,7 +216,7 @@ class PewPew(pg.sprite.Sprite):
                 Mob.mob_hitpoints -= 1
 
     def update(self):
-        self.collide_with_group(self.game.coins, True)
+        self.collide_with_group(self.game.mobs, True)
         self.rect.y -= self.speed
         # pass
 
@@ -263,6 +271,7 @@ class PowerUp2(pg.sprite.Sprite):
         self.y = y
         self.rect.x = x * TILESIZE
         self.rect.y = y * TILESIZE
+        #new cactus class
 class Cactus(pg.sprite.Sprite):
     def __init__(self, game, x, y):
         self.groups = game.all_sprites, game.mobs
@@ -283,7 +292,42 @@ class Cactus(pg.sprite.Sprite):
         self.rot = 0
         # added
         # self.health = MOB_HEALTH
-      
+class SpeedBoost(pg.sprite.Sprite):
+    def __init__(self, game, x, y):
+        self.groups = game.all_sprites, game.coins
+        pg.sprite.Sprite.__init__(self, self.groups)
+        self.game = game
+        self.image = pg.Surface((TILESIZE, TILESIZE))
+        self.image = game.speedboost_img
+        self.rect = self.image.get_rect()
+        # self.image = game.mob_img
+        # self.image = pg.Surface((TILESIZE, TILESIZE))
+        # self.image.fill(ORANGE)
+        # self.hit_rect = MOB_HIT_RECT.copy()
+        # self.hit_rect.center = self.rect.center
+        self.pos = vec(x, y) * TILESIZE
+        self.vel = vec(0, 0)
+        self.acc = vec(0, 0)
+        self.rect.center = self.pos
+        self.rot = 0
+class HealthBox(pg.sprite.Sprite):
+    def __init__(self, game, x, y):
+        self.groups = game.all_sprites, game.coins
+        pg.sprite.Sprite.__init__(self, self.groups)
+        self.game = game
+        self.image = pg.Surface((TILESIZE, TILESIZE))
+        self.image = game.healthbox_img
+        self.rect = self.image.get_rect()
+        # self.image = game.mob_img
+        # self.image = pg.Surface((TILESIZE, TILESIZE))
+        # self.image.fill(ORANGE)
+        # self.hit_rect = MOB_HIT_RECT.copy()
+        # self.hit_rect.center = self.rect.center
+        self.pos = vec(x, y) * TILESIZE
+        self.vel = vec(0, 0)
+        self.acc = vec(0, 0)
+        self.rect.center = self.pos
+        self.rot = 0   
         
 class Mob(pg.sprite.Sprite):
     def __init__(self, game, x, y):
@@ -367,9 +411,11 @@ class Mob2(pg.sprite.Sprite):
         self.pos = vec(x, y) * TILESIZE
         self.vel = vec(0, 0)
         self.acc = vec(0, 0)
+        self.mob2hitpots = 100
         self.rect.center = self.pos
         self.rot = 0
         self.chase_distance = 500
+
         # added
         self.speed = 150
         self.chasing = False
@@ -379,6 +425,7 @@ class Mob2(pg.sprite.Sprite):
             self.chasing = True
         else:
             self.chasing = False
+
     def update(self):
         self.sensor()
         if self.chasing:
@@ -397,3 +444,8 @@ class Mob2(pg.sprite.Sprite):
             # self.rect.center = self.hit_rect.center
             # if self.health <= 0:
             #     self.kill()
+    def collide_with_group_mob2(self, group, kill):
+        hits = pg.sprite.spritecollide(self, group, kill)
+        if hits:
+            if str(hits[0].__class__.__name__) == "PewPew":
+                self.mob2hitpots -= 1

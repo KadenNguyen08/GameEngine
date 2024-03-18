@@ -1,6 +1,6 @@
-'''health bar
-   Death Screen
-   low health warning sign'''
+'''Health bar
+   Obstacles (Catuses)
+   Health Rocovery Box'''
 import pygame as pg
 from settings import *
 from sprites import *
@@ -28,6 +28,8 @@ class Game:
         self.game_folder = path.dirname(__file__)
         self.img_folder = path.join(self.game_folder, 'images')
         self.cactus_img = pg.image.load(path.join(self.img_folder, 'cactus.png')).convert_alpha()
+        self.healthbox_img = pg.image.load(path.join(self.img_folder, 'red.png')).convert_alpha()
+        self.speedboost_img = pg.image.load(path.join(self.img_folder, 'speed.png')).convert_alpha()
         self.map_data = []
         '''
         The with statement is a context manager in Python. 
@@ -78,6 +80,10 @@ class Game:
                     PowerUp2(self, col, row)
                 if tile == 'G':
                     Cactus(self, col, row)
+                if tile == 'H':
+                    HealthBox(self, col, row)
+                if tile == 'S':
+                    SpeedBoost(self, col, row)
 
     def run(self):
 
@@ -123,6 +129,7 @@ class Game:
             if self.player.hitpoints <= 50:
                 self.draw_text(self.screen, str(self.player.hitpoints), 100, RED, WIDTH/2 - 400, 0)
                 self.draw_text(self.screen, str("Warning, Low Health"), 100, RED, WIDTH/2 - -100, 0)
+           
             #Displays the player health here.
             pg.display.flip()
     def events(self):
