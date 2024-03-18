@@ -1,4 +1,5 @@
-
+#This file was created by Kaden Nguyen
+#Appreciation to Chris Bradfield
 import pygame as pg
 from settings import *
 from utils import *
@@ -129,18 +130,21 @@ class Player(pg.sprite.Sprite):
                 print(self.hitpoints)
                 if self.status == "Invincible":
                     print("you can't hurt me")
+            #Collisions for Cactus here
             if str(hits[0].__class__.__name__) == "Cactus":
                 # print(hits[0].__class__.__name__)
                 # print("Collided with mob")
                 self.hitpoints -= 1
+            #Collisions for Healthbox here
             if str(hits[0].__class__.__name__) == "HealthBox":
                 # print(hits[0].__class__.__name__)
                 # print("Collided with mob")
                 self.hitpoints += 50
+            #Collisions for Speedboost here
             if str(hits[0].__class__.__name__) == "SpeedBoost":
                 # print(hits[0].__class__.__name__)
                 # print("Collided with mob")
-                self.speed += 20
+                self.speed += 300
  
                     
 
@@ -271,7 +275,7 @@ class PowerUp2(pg.sprite.Sprite):
         self.y = y
         self.rect.x = x * TILESIZE
         self.rect.y = y * TILESIZE
-        #new cactus class
+#new cactus class
 class Cactus(pg.sprite.Sprite):
     def __init__(self, game, x, y):
         self.groups = game.all_sprites, game.mobs
@@ -292,6 +296,7 @@ class Cactus(pg.sprite.Sprite):
         self.rot = 0
         # added
         # self.health = MOB_HEALTH
+#The New Speedboost is located here.
 class SpeedBoost(pg.sprite.Sprite):
     def __init__(self, game, x, y):
         self.groups = game.all_sprites, game.coins
@@ -310,6 +315,7 @@ class SpeedBoost(pg.sprite.Sprite):
         self.acc = vec(0, 0)
         self.rect.center = self.pos
         self.rot = 0
+#The New Healthbox Class is located here.
 class HealthBox(pg.sprite.Sprite):
     def __init__(self, game, x, y):
         self.groups = game.all_sprites, game.coins

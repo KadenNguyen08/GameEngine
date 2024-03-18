@@ -1,4 +1,13 @@
-'''Health bar
+#This file was created by Kaden Nguyen
+#Credits:
+    #Chat GPT https://chat.openai.com/
+    #Mr. Cozort's Github https://github.com/ccozort/cozort_chris_game_engine_Spring_2024
+    #
+
+
+
+
+'''Health symbol and Speed Boosts
    Obstacles (Catuses)
    Health Rocovery Box'''
 import pygame as pg
@@ -126,7 +135,13 @@ class Game:
             self.draw_text(self.screen, str(self.cooldown.event_time), 24, WHITE, WIDTH/2 - 32, 80)
             self.draw_text(self.screen, str(self.cooldown.get_countdown()), 24, WHITE, WIDTH/2 - 32, 120)
             self.draw_text(self.screen, str(self.player.hitpoints), 100, WHITE, WIDTH/2 - 400, 0)
+            #Health symbol featured here
+            if self.player.hitpoints >= 51:
+                self.draw_text(self.screen, str(self.player.hitpoints), 100, GREEN, WIDTH/2 - 400, 0)
             if self.player.hitpoints <= 50:
+                #Changes color based on health of the player
+                self.draw_text(self.screen, str(self.player.hitpoints), 100, YELLOW, WIDTH/2 - 400, 0)
+            if self.player.hitpoints <= 30:
                 self.draw_text(self.screen, str(self.player.hitpoints), 100, RED, WIDTH/2 - 400, 0)
                 self.draw_text(self.screen, str("Warning, Low Health"), 100, RED, WIDTH/2 - -100, 0)
            
