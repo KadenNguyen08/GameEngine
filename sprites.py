@@ -137,13 +137,11 @@ class Player(pg.sprite.Sprite):
                 self.hitpoints -= 1
             #Collisions for Healthbox here
             if str(hits[0].__class__.__name__) == "HealthBox":
-                # print(hits[0].__class__.__name__)
-                # print("Collided with mob")
                 self.hitpoints += 50
+                #Adds 50 points to player health if player collides
             #Collisions for Speedboost here
             if str(hits[0].__class__.__name__) == "SpeedBoost":
-                # print(hits[0].__class__.__name__)
-                # print("Collided with mob")
+                #adds 300 to player speed
                 self.speed += 300
  
                     
@@ -300,40 +298,41 @@ class Cactus(pg.sprite.Sprite):
 class SpeedBoost(pg.sprite.Sprite):
     def __init__(self, game, x, y):
         self.groups = game.all_sprites, game.coins
+        #Classified as a coin
         pg.sprite.Sprite.__init__(self, self.groups)
+        #initizalies groups
         self.game = game
+        #Define game
         self.image = pg.Surface((TILESIZE, TILESIZE))
         self.image = game.speedboost_img
+        #defines self.image
         self.rect = self.image.get_rect()
-        # self.image = game.mob_img
-        # self.image = pg.Surface((TILESIZE, TILESIZE))
-        # self.image.fill(ORANGE)
-        # self.hit_rect = MOB_HIT_RECT.copy()
-        # self.hit_rect.center = self.rect.center
+        #defines self.rect
         self.pos = vec(x, y) * TILESIZE
         self.vel = vec(0, 0)
         self.acc = vec(0, 0)
         self.rect.center = self.pos
-        self.rot = 0
+        #sets poisitions
 #The New Healthbox Class is located here.
 class HealthBox(pg.sprite.Sprite):
     def __init__(self, game, x, y):
         self.groups = game.all_sprites, game.coins
+        #Classified in the coins group
         pg.sprite.Sprite.__init__(self, self.groups)
+        #Intializes the group
         self.game = game
+        #Defines self.game
         self.image = pg.Surface((TILESIZE, TILESIZE))
         self.image = game.healthbox_img
+        #Defines the self.image
         self.rect = self.image.get_rect()
-        # self.image = game.mob_img
-        # self.image = pg.Surface((TILESIZE, TILESIZE))
-        # self.image.fill(ORANGE)
-        # self.hit_rect = MOB_HIT_RECT.copy()
-        # self.hit_rect.center = self.rect.center
+        #defines self.rect
         self.pos = vec(x, y) * TILESIZE
         self.vel = vec(0, 0)
         self.acc = vec(0, 0)
         self.rect.center = self.pos
-        self.rot = 0   
+        #Defines positions and speed
+       
         
 class Mob(pg.sprite.Sprite):
     def __init__(self, game, x, y):

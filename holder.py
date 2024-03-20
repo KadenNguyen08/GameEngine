@@ -21,13 +21,12 @@ class Game:
         self.clock = pg.time.Clock()
         self.load_data()
         self.playing = True
+
+                  
        
     def load_data(self):
         self.game_folder = path.dirname(__file__)
         self.img_folder = path.join(self.game_folder, 'images')
-        self.cactus_img = pg.image.load(path.join(self.img_folder, 'cactus.png')).convert_alpha()
-        self.healthbox_img = pg.image.load(path.join(self.img_folder, 'red.png')).convert_alpha()
-        self.speedboost_img = pg.image.load(path.join(self.img_folder, 'speed.png')).convert_alpha()
         self.map_data = []
         '''
         The with statement is a context manager in Python. 
@@ -53,8 +52,6 @@ class Game:
         self.mobs = pg.sprite.Group()
         self.pew_pews = pg.sprite.Group()
         self.power_ups = pg.sprite.Group()
-        self.power_up2 = pg.sprite.Group()
-        self.cactus = pg.sprite.Group()
         self.player = pg.sprite.Group()
         # self.player1 = Player(self, 1, 1)
         # for x in range(10, 20):
@@ -71,17 +68,12 @@ class Game:
                 if tile == 'C':
                     Coin(self, col, row)
                 if tile == 'M':
-                    Mob2(self, col, row)
+                    Mob(self, col, row)
                 if tile == 'U':
                     PowerUp(self, col, row)
                 if tile == 'K':
-                    PowerUp2(self, col, row)
-                if tile == 'G':
                     Cactus(self, col, row)
-                if tile == 'H':
-                    HealthBox(self, col, row)
-                if tile == 'S':
-                    SpeedBoost(self, col, row)
+
 
     def run(self):
 
@@ -125,18 +117,17 @@ class Game:
             self.draw_text(self.screen, str(self.cooldown.get_countdown()), 24, WHITE, WIDTH/2 - 32, 120)
             self.draw_text(self.screen, str(self.player.hitpoints), 100, WHITE, WIDTH/2 - 400, 0)
             #Health symbol featured here
-            #Coordines are 400,0
-             #Changes color (green) based on health of the player in the elif statment if self.hitpoints is equal to or greater than 51.
+            #draws the health symbol to the left
             if self.player.hitpoints >= 51:
                 self.draw_text(self.screen, str(self.player.hitpoints), 100, GREEN, WIDTH/2 - 400, 0)
-            elif self.player.hitpoints <= 50:
-                #Changes color (yellow) based on health of the player in the elif statment if self.hitpoints is less than or equal to 50.
+                #changes color to green if health is 51 or greater
+            if self.player.hitpoints <= 50:
+                #changes color to tellow if health is 50 or yes
                 self.draw_text(self.screen, str(self.player.hitpoints), 100, YELLOW, WIDTH/2 - 400, 0)
-                    #Changes color (red) based on health of the player in the elif statment if self.hitpoints is less than or equal to 30, gives a low health warning.
-            elif self.player.hitpoints <= 30:  
+                #Changes to red if health is less than 30, gives a warning
+            if self.player.hitpoints <= 30:
                 self.draw_text(self.screen, str(self.player.hitpoints), 100, RED, WIDTH/2 - 400, 0)
                 self.draw_text(self.screen, str("Warning, Low Health"), 100, RED, WIDTH/2 - -100, 0)
-                
            
             #Displays the player health here.
             pg.display.flip()
