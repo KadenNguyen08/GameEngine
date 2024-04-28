@@ -1,5 +1,5 @@
 #This file was created by: Kaden Nguyen
-# Enjoyed health bar, pewpews, speed boost    Disliked- no storyline or point to the game yetwwwwwwww
+# Enjoyed health bar, pewpews, speed boost    Disliked- no storyline or point to the game yet
 '''Health Bar
    Speed Boost     
    Med Kit'''
@@ -11,13 +11,16 @@ from random import randint
 import sys
 from os import path
 from math import floor
-
+from random import choice
+import os
+from random import choice
+import random
 '''Beta Goals
    
-1. A sword that you can pick up and kill enemies with it
-2. Bullet Directions
-3. 
-
+1. More interesting enemies
+2. Game Goal and End
+3. More maps
+Credits: Mr. Cozort's Github, Chatgpt
 
 '''
 
@@ -48,13 +51,22 @@ class Game:
         It is used to ensure that a resource is properly closed or released 
         after it is used. This can help to prevent errors and leaks.
         '''
-        with open(path.join(self.game_folder, 'map.txt'), 'rt') as f:
+        #defines map folder variable
+        map_folder = "Maps"
+
+# Lists all of the map files in the folder
+        map_files = [f for f in os.listdir(map_folder) if os.path.isfile(os.path.join(map_folder, f))]
+
+# Randomly chooses a map
+        random_map_file = random.choice(map_files)
+
+# Opens the random map file
+        with open(os.path.join(map_folder, random_map_file), 'rt') as f:
             for line in f:
                 print(line)
                 self.map_data.append(line)
-    def test_method(self):
-        print("I can be called from Sprites...")
-    
+            def test_method(self):
+                print("I can be called from Sprites...")
 
 
     def new(self):
@@ -74,9 +86,7 @@ class Game:
         self.turret = pg.sprite.Group()
         self.turret = pg.sprite.Group()
         self.bullets = pg.sprite.Group()
-        self.enemypew = pg.sprite.Group()
-        for turret in self.turret:
-            turret.update()
+        self.mob_spawner = pg.sprite.Group()
         # self.player1 = Player(self, 1, 1)
         # for x in range(10, 20):
         #     Wall(self, x, 5)
@@ -105,6 +115,10 @@ class Game:
                     SpeedBoost(self, col, row)
                 if tile == 'T':
                     Turret(self,col,row)
+                if tile == 'O':
+                    Mob_Spawner(self, col, row)
+
+                    
                     
     def run(self):
 
@@ -138,6 +152,7 @@ class Game:
         text_rect = text_surface.get_rect()
         text_rect.midtop = (x,y)
         surface.blit(text_surface, text_rect)
+
     
     def draw(self):
             self.screen.fill(BGCOLOR)
@@ -148,8 +163,9 @@ class Game:
             self.draw_text(self.screen, str(self.cooldown.event_time), 24, WHITE, WIDTH/2 - 32, 80)
             self.draw_text(self.screen, str(self.cooldown.get_countdown()), 24, WHITE, WIDTH/2 - 32, 120)
             self.draw_text(self.screen, str(self.player.hitpoints), 100, WHITE, WIDTH/2 - 400, 0)
-            self.draw_text(self.screen, str(self.player.coin_count), 100, YELLOW, WIDTH/2 - -400, 0)
-            self.draw_text(self.screen, str("Coins"), 100, YELLOW, WIDTH/2 - -200, 0)
+            self.draw_text(self.screen, str(self.player.coin_count), 100, YELLOW, WIDTH/2 - -400, 600)
+            #Displays # of coins collected
+            self.draw_text(self.screen, str("Coins"), 100, YELLOW, WIDTH/2 - -200, 600)
             #Health symbol featured here
             #Coordines are 400,0
              #Changes color (green) based on health of the player in the elif statment if self.hitpoints is equal to or greater than 51.
@@ -162,8 +178,10 @@ class Game:
             if self.player.hitpoints <= 30:  
                 self.draw_text(self.screen, str(self.player.hitpoints), 100, RED, WIDTH/2 - 400, 0)
                 self.draw_text(self.screen, str("Warning, Low Health"), 100, RED, WIDTH/2 - -100, 0)
+            #Displays when coin count is 5
             if self.player.coin_count == 5:
                  self.screen.fill(BGCOLOR)
+                 #Displays "you win! here"
                  self.draw_text(self.screen, "You win!", 100, WHITE, WIDTH/2, HEIGHT/2)
                  pg.display.flip()
            
@@ -197,6 +215,7 @@ class Game:
                     self.quit()
                 if event.type == pg.KEYUP:
                     waiting = False
+
 
     
 

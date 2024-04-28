@@ -76,6 +76,7 @@ class Player(pg.sprite.Sprite):
         self.status = ""
         self.hitpoints = 100
         self.cooling = False
+        #sets the initial value of coin_count
         self.coin_count = 0
         self.pos = vec(0,0)
         print(self.hitpoints)
@@ -103,6 +104,7 @@ class Player(pg.sprite.Sprite):
         # Calculate direction based on player's orientation or any other logic
         direction = vec(1, 0)  # Example direction (to the right)
         p = PewPew(self.game, self.rect.x, self.rect.y)
+
 
     # def move(self, dx=0, dy=0):
     #     if not self.collide_with_walls(dx, dy):
@@ -141,6 +143,7 @@ class Player(pg.sprite.Sprite):
         if hits:
             if str(hits[0].__class__.__name__) == "Coin":
                 self.moneybag += 1
+                #Adds to coin score
                 self.coin_count += 1
             if str(hits[0].__class__.__name__) == "PowerUp":
                 print(hits[0].__class__.__name__)
@@ -218,6 +221,8 @@ class Player(pg.sprite.Sprite):
             self.collide_with_group(self.game.power_ups, True)
         self.collide_with_group(self.game.mobs, False)
         self.collide_with_group(self.game.bullets, True)
+ 
+
 
  
           
@@ -502,16 +507,18 @@ class Bullet(pg.sprite.Sprite):
         self.rect.center = (x, y)
         self.direction = direction
         self.speed = 10
+        #Defeins velocity
         self.velocity = self.direction * self.speed
 
     def update(self):
+      #Updates coordinates  
         self.rect.x += self.velocity.x
         self.rect.y += self.velocity.y
-        # Remove bullet if it goes off-screen
+     
 
 
             
-
+#new turret class
 class Turret(pg.sprite.Sprite):
     def __init__(self, game, x, y):
         self.groups = game.all_sprites, game.turret
@@ -522,31 +529,52 @@ class Turret(pg.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.image = game.turret_img
         self.rect.center = (x, y)
-        self.fire_rate = 1  # Fire rate in milliseconds
+        self.fire_rate = 1  # This is the fire rate of the turret in miliseconds
         self.last_fire = pg.time.get_ticks()
+        #keeps track of time from when the last bullet was fired
         self.x = x
         self.y = y
-        self.health = 500
         self.rect.x = x * TILESIZE
         self.rect.y = y * TILESIZE
     def update(self):
+        #gets the time in milliseconds
         now = pg.time.get_ticks()
+        #calculates the time that has passed since the last bullet was fired, fires another bullet if the time that has 
+        #passed is greater than or equal to the fire rate
         if now - self.last_fire >= self.fire_rate:
-            # Calculate direction to the player
+            # This line calculates the bullet's direction to the player
             direction = vec(self.game.player.rect.center) - vec(self.rect.center)
+            #Creates a vector from the turret to the player.
+            #Ensures that the bullet travels at a constant speed regardless of distance
             direction = direction.normalize()
-            # Create and add a bullet
+            # Creates an instance of the bullet class
             Bullet(self.game, self.rect.centerx, self.rect.centery, direction)
+            #allows the turret to track time since shooting
             self.last_fire = now
-    def collide_with_g(self, group, kill):
-        hits = pg.sprite.spritecollide(self, group, kill)
-        if hits:
-            if str(hits[0].__class__.__name__) == "PewPew":
-                self.health -= 1
 
-# Add this part in your game loop to update the turret
-# It should be after updating other sprites' positions and before drawing everything
-
-
-
-
+class Mob_Spawner(pg.sprite.Sprite):
+    def __init__(self, game, x, y):
+        self.groups = game.all_sprites, game.mob_spawner
+        pg.sprite.Sprite.__init__(self, self.groups)
+        self.game = game
+        self.image = pg.Surface((TILESIZE, TILESIZE))
+        self.image.fill(ORANGE)  # Adjust color as needed
+        self.rect = self.image.get_rect()
+        self.rect.center = (x, y)
+        self.fire_rate = 0  # This is the fire rate of the turret in miliseconds
+        self.last_fire = pg.time.get_ticks()
+        #keeps track of time from when the last bullet was fired
+        self.x = x
+        self.y = y
+        self.rect.x = x * TILESIZE
+        self.rect.y = y * TILESIZE
+    def update(self):
+    # Gets the time in milliseconds
+        now = pg.time.get_ticks()
+    # Calculates the time that has passed since the last mob was spawned,
+    # spawns another mob if the time that has passed is greater than or equal to the fire rate
+        if now - self.last_fire >= self.fire_rate:
+        # Creates an instance of the mob class (Mob2)
+            Mob2(self.game, self.rect.centerx, self.rect.centery)
+        # Allows the turret to track time since spawning a mob
+            self.last_fire = now
