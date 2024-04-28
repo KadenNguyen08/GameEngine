@@ -1,4 +1,8 @@
-
+#This file was created by: Kaden Nguyen
+# Enjoyed health bar, pewpews, speed boost    Disliked- no storyline or point to the game yetwwwwwwww
+'''Health Bar
+   Speed Boost     
+   Med Kit'''
 import pygame as pg
 from settings import *
 from sprites import *
@@ -7,6 +11,15 @@ from random import randint
 import sys
 from os import path
 from math import floor
+
+'''Beta Goals
+   
+1. A sword that you can pick up and kill enemies with it
+2. Bullet Directions
+3. 
+
+
+'''
 
 class Game:
 
@@ -28,6 +41,7 @@ class Game:
         self.cactus_img = pg.image.load(path.join(self.img_folder, 'cactus.png')).convert_alpha()
         self.healthbox_img = pg.image.load(path.join(self.img_folder, 'red.png')).convert_alpha()
         self.speedboost_img = pg.image.load(path.join(self.img_folder, 'speed.png')).convert_alpha()
+        self.turret_img = pg.image.load(path.join(self.img_folder, 'turret.png')).convert_alpha()
         self.map_data = []
         '''
         The with statement is a context manager in Python. 
@@ -40,6 +54,7 @@ class Game:
                 self.map_data.append(line)
     def test_method(self):
         print("I can be called from Sprites...")
+    
 
 
     def new(self):
@@ -56,6 +71,12 @@ class Game:
         self.power_up2 = pg.sprite.Group()
         self.cactus = pg.sprite.Group()
         self.player = pg.sprite.Group()
+        self.turret = pg.sprite.Group()
+        self.turret = pg.sprite.Group()
+        self.bullets = pg.sprite.Group()
+        self.enemypew = pg.sprite.Group()
+        for turret in self.turret:
+            turret.update()
         # self.player1 = Player(self, 1, 1)
         # for x in range(10, 20):
         #     Wall(self, x, 5)
@@ -82,7 +103,9 @@ class Game:
                     HealthBox(self, col, row)
                 if tile == 'S':
                     SpeedBoost(self, col, row)
-
+                if tile == 'T':
+                    Turret(self,col,row)
+                    
     def run(self):
 
         self.playing = True
@@ -98,6 +121,7 @@ class Game:
     
         self.cooldown.ticking()
         self.all_sprites.update()
+        self.walls.update()
         if self.player.hitpoints < 1:
             self.playing = False
     
@@ -133,7 +157,7 @@ class Game:
                 #Changes color (yellow) based on health of the player in the elif statment if self.hitpoints is less than or equal to 50.
                 self.draw_text(self.screen, str(self.player.hitpoints), 100, YELLOW, WIDTH/2 - 400, 0)
                     #Changes color (red) based on health of the player in the elif statment if self.hitpoints is less than or equal to 30, gives a low health warning.
-            elif self.player.hitpoints <= 30:  
+            if self.player.hitpoints <= 30:  
                 self.draw_text(self.screen, str(self.player.hitpoints), 100, RED, WIDTH/2 - 400, 0)
                 self.draw_text(self.screen, str("Warning, Low Health"), 100, RED, WIDTH/2 - -100, 0)
                 
@@ -179,4 +203,4 @@ g.show_start_screen()
 while True:
     g.new()
     g.run()
-  
+    g.all_sprites.update()

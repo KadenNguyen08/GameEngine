@@ -5,9 +5,27 @@ from settings import *
 from utils import *
 from random import choice
 import math
-
+from os import path
 vec =pg.math.Vector2
+# needed for animated sprite
+SPRITESHEET = "theBell.png"
+# needed for animated sprite
+game_folder = path.dirname(__file__)
+img_folder = path.join(game_folder, 'images')
+# needed for animated sprite
+class Spritesheet:
+    # utility class for loading and parsing spritesheets
+    def __init__(self, filename):
+        self.spritesheet = pg.image.load(filename).convert()
 
+    def get_image(self, x, y, width, height):
+        # grab an image out of a larger spritesheet
+        image = pg.Surface((width, height))
+        image.blit(self.spritesheet, (0, 0), (x, y, width, height))
+        # image = pg.transform.scale(image, (width, height))
+        image = pg.transform.scale(image, (width * 1, height * 1))
+        return image
+       
 def collide_with_walls(sprite, group, dir):
     if dir == 'x':
         hits = pg.sprite.spritecollide(sprite, group, False)
@@ -36,11 +54,23 @@ class Player(pg.sprite.Sprite):
         pg.sprite.Sprite.__init__(self, self.groups)
         self.game = game
         self.image = pg.Surface((TILESIZE, TILESIZE))
+        self.spritesheet = Spritesheet(path.join(img_folder, SPRITESHEET))
+        self.load_images()
         self.image.fill(GREEN)
+        self.image = self.standing_frames[0]
         self.rect = self.image.get_rect()
         self.vx, self.vy = 0, 0
         self.x = x * TILESIZE
         self.y = y * TILESIZE
+        # needed for animated sprite
+        self.current_frame = 0
+        # needed for animated sprite
+        self.last_update = 0
+        self.material = True
+        # needed for animated sprite
+        self.jumping = False
+        # needed for animated sprite
+        self.walking = False
         self.moneybag = 0
         self.speed = 300
         self.status = ""
@@ -48,6 +78,7 @@ class Player(pg.sprite.Sprite):
         self.cooling = False
         self.pos = vec(0,0)
         print(self.hitpoints)
+
 
     def get_keys(self):
         self.vx, self.vy = 0, 0 
@@ -68,9 +99,9 @@ class Player(pg.sprite.Sprite):
             self.vx *= 0.7071
             self.vy *= 0.7071
     def pew(self):
+        # Calculate direction based on player's orientation or any other logic
+        direction = vec(1, 0)  # Example direction (to the right)
         p = PewPew(self.game, self.rect.x, self.rect.y)
-        print(p.rect.x)
-        print(p.rect.y)
 
     # def move(self, dx=0, dy=0):
     #     if not self.collide_with_walls(dx, dy):
@@ -119,10 +150,6 @@ class Player(pg.sprite.Sprite):
             if str(hits[0].__class__.__name__) == "PowerUp2":
                 print(hits[0].__class__.__name__)
                 self.speed += 100
-                print(self.speed)
-          
-                if effect == "Invincible":
-                    self.status = "Invincible"
             if str(hits[0].__class__.__name__) == "Mob2":
                 # print(hits[0].__class__.__name__)
                 # print("Collided with mob")
@@ -143,15 +170,37 @@ class Player(pg.sprite.Sprite):
             if str(hits[0].__class__.__name__) == "SpeedBoost":
                 #adds 300 to player speed
                 self.speed += 300
+            if str(hits[0].__class__.__name__) == "Bullet":
+                self.hitpoints -= 10
+                #Adds 50 points to player health if player collides
+            
  
-                    
+    def load_images(self):
+        self.standing_frames = [self.spritesheet.get_image(0,0, 32, 32), 
+                                self.spritesheet.get_image(32,0, 32, 32)]
+        # for frame in self.standing_frames:
+        #     frame.set_colorkey(BLACK)
+
+        # add other frame sets for different poses etc.
+    # needed for animated sprite        
+    def animate(self):
+        now = pg.time.get_ticks()
+        if now - self.last_update > 350:
+            self.last_update = now
+            self.current_frame = (self.current_frame + 1) % len(self.standing_frames)
+            bottom = self.rect.bottom
+            self.image = self.standing_frames[self.current_frame]
+            self.rect = self.image.get_rect()
+            self.rect.bottom = bottom              
 
                    
                         
-
+     
     def update(self):
         self.get_keys()
         # self.power_up_cd.ticking()
+        self.animate()
+        self.get_keys()
         self.x += self.vx * self.game.dt
         self.y += self.vy * self.game.dt
         self.rect.x = self.x
@@ -166,7 +215,9 @@ class Player(pg.sprite.Sprite):
         if not self.cooling:
             self.collide_with_group(self.game.power_ups, True)
         self.collide_with_group(self.game.mobs, False)
-    
+        self.collide_with_group(self.game.bullets, True)
+
+ 
           
         # coin_hits = pg.sprite.spritecollide(self.game.coins, True)
         # if coin_hits:
@@ -176,7 +227,7 @@ class Player(pg.sprite.Sprite):
 
         
 class PewPew(pg.sprite.Sprite):
-    def __init__(self, game, x, y):
+    def __init__(self, game, x, y, ):
         self.groups = game.all_sprites, game.pew_pews
         pg.sprite.Sprite.__init__(self, self.groups)
         self.game = game
@@ -194,28 +245,7 @@ class PewPew(pg.sprite.Sprite):
         # if hits:
         #     if str(hits[0].__class__.__name__) == "Coin":
         #         self.moneybag += 1
-    def collide_with_enemy(sprite, group, dir):
-        if dir == 'x':
-            hits = pg.sprite.spritecollide(sprite, group, False)
-            if hits:
-                if hits[0].rect.centerx > sprite.rect.centerx:
-                    sprite.pos.x = hits[0].rect.left - sprite.rect.width / 2
-                if hits[0].rect.centerx < sprite.rect.centerx:
-                    sprite.pos.x = hits[0].rect.right + sprite.rect.width / 2
-                sprite.vel.x = 0
-                sprite.rect.centerx = sprite.pos.x
-                Mob.mob_hitpoints -= 1
-                
-        if dir == 'y':
-            hits = pg.sprite.spritecollide(sprite, group, False)
-            if hits:
-                if hits[0].rect.centery > sprite.rect.centery:
-                    sprite.pos.y = hits[0].rect.top - sprite.rect.height / 2
-                if hits[0].rect.centery < sprite.rect.centery:
-                    sprite.pos.y = hits[0].rect.bottom + sprite.rect.height / 2
-                sprite.vel.y = 0
-                sprite.rect.centery = sprite.pos.y
-                Mob.mob_hitpoints -= 1
+ 
 
     def update(self):
         self.collide_with_group(self.game.mobs, True)
@@ -454,3 +484,65 @@ class Mob2(pg.sprite.Sprite):
         if hits:
             if str(hits[0].__class__.__name__) == "PewPew":
                 self.mob2hitpots -= 1
+import pygame as pg
+
+# Add this code after the existing classes in your script
+
+class Bullet(pg.sprite.Sprite):
+    def __init__(self, game, x, y, direction):
+        self.groups = game.all_sprites, game.bullets
+        pg.sprite.Sprite.__init__(self, self.groups)
+        self.game = game
+        self.image = pg.Surface((TILESIZE/4, TILESIZE/4))
+        self.image.fill(RED)
+        self.rect = self.image.get_rect()
+        self.rect.center = (x, y)
+        self.direction = direction
+        self.speed = 10
+        self.velocity = self.direction * self.speed
+
+    def update(self):
+        self.rect.x += self.velocity.x
+        self.rect.y += self.velocity.y
+        # Remove bullet if it goes off-screen
+
+
+            
+
+class Turret(pg.sprite.Sprite):
+    def __init__(self, game, x, y):
+        self.groups = game.all_sprites, game.turret
+        pg.sprite.Sprite.__init__(self, self.groups)
+        self.game = game
+        self.image = pg.Surface((TILESIZE, TILESIZE))
+        self.image.fill(YELLOW)  # Adjust color as needed
+        self.rect = self.image.get_rect()
+        self.rect.center = (x, y)
+        self.fire_rate = 1  # Fire rate in milliseconds
+        self.last_fire = pg.time.get_ticks()
+        self.x = x
+        self.y = y
+        self.health = 500
+        self.rect.x = x * TILESIZE
+        self.rect.y = y * TILESIZE
+    def update(self):
+        now = pg.time.get_ticks()
+        if now - self.last_fire >= self.fire_rate:
+            # Calculate direction to the player
+            direction = vec(self.game.player.rect.center) - vec(self.rect.center)
+            direction = direction.normalize()
+            # Create and add a bullet
+            Bullet(self.game, self.rect.centerx, self.rect.centery, direction)
+            self.last_fire = now
+    def collide_with_g(self, group, kill):
+        hits = pg.sprite.spritecollide(self, group, kill)
+        if hits:
+            if str(hits[0].__class__.__name__) == "PewPew":
+                self.health -= 1
+
+# Add this part in your game loop to update the turret
+# It should be after updating other sprites' positions and before drawing everything
+
+
+
+
