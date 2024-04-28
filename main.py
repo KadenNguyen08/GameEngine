@@ -148,6 +148,8 @@ class Game:
             self.draw_text(self.screen, str(self.cooldown.event_time), 24, WHITE, WIDTH/2 - 32, 80)
             self.draw_text(self.screen, str(self.cooldown.get_countdown()), 24, WHITE, WIDTH/2 - 32, 120)
             self.draw_text(self.screen, str(self.player.hitpoints), 100, WHITE, WIDTH/2 - 400, 0)
+            self.draw_text(self.screen, str(self.player.coin_count), 100, YELLOW, WIDTH/2 - -400, 0)
+            self.draw_text(self.screen, str("Coins"), 100, YELLOW, WIDTH/2 - -200, 0)
             #Health symbol featured here
             #Coordines are 400,0
              #Changes color (green) based on health of the player in the elif statment if self.hitpoints is equal to or greater than 51.
@@ -160,7 +162,10 @@ class Game:
             if self.player.hitpoints <= 30:  
                 self.draw_text(self.screen, str(self.player.hitpoints), 100, RED, WIDTH/2 - 400, 0)
                 self.draw_text(self.screen, str("Warning, Low Health"), 100, RED, WIDTH/2 - -100, 0)
-                
+            if self.player.coin_count == 5:
+                 self.screen.fill(BGCOLOR)
+                 self.draw_text(self.screen, "You win!", 100, WHITE, WIDTH/2, HEIGHT/2)
+                 pg.display.flip()
            
             #Displays the player health here.
             pg.display.flip()

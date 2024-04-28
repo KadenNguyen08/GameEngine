@@ -76,6 +76,7 @@ class Player(pg.sprite.Sprite):
         self.status = ""
         self.hitpoints = 100
         self.cooling = False
+        self.coin_count = 0
         self.pos = vec(0,0)
         print(self.hitpoints)
 
@@ -140,6 +141,7 @@ class Player(pg.sprite.Sprite):
         if hits:
             if str(hits[0].__class__.__name__) == "Coin":
                 self.moneybag += 1
+                self.coin_count += 1
             if str(hits[0].__class__.__name__) == "PowerUp":
                 print(hits[0].__class__.__name__)
                 effect = choice(POWER_UP_EFFECTS)
@@ -264,6 +266,7 @@ class Wall(pg.sprite.Sprite):
         self.y = y
         self.rect.x = x * TILESIZE
         self.rect.y = y * TILESIZE
+
 
 
 class Coin(pg.sprite.Sprite):
@@ -517,6 +520,7 @@ class Turret(pg.sprite.Sprite):
         self.image = pg.Surface((TILESIZE, TILESIZE))
         self.image.fill(YELLOW)  # Adjust color as needed
         self.rect = self.image.get_rect()
+        self.image = game.turret_img
         self.rect.center = (x, y)
         self.fire_rate = 1  # Fire rate in milliseconds
         self.last_fire = pg.time.get_ticks()
