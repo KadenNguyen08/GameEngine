@@ -1,5 +1,6 @@
 #This file was created by: Kaden Nguyen
 # Enjoyed health bar, pewpews, speed boost    Disliked- no storyline or point to the game yet
+#References-Mr. Cozort's Github, Chatgpt
 '''Health Bar
    Speed Boost     
    Med Kit'''
@@ -54,13 +55,13 @@ class Game:
         #defines map folder variable
         map_folder = "Maps"
 
-# Lists all of the map files in the folder
+# Lists all of the map files in the folder, Copied from Chatgpt, modified
         map_files = [f for f in os.listdir(map_folder) if os.path.isfile(os.path.join(map_folder, f))]
 
-# Randomly chooses a map
+# Randomly chooses a map Copied from Chatgpt, modified
         random_map_file = random.choice(map_files)
 
-# Opens the random map file
+# Opens the random map file, Copied from Chatgpt, modified
         with open(os.path.join(map_folder, random_map_file), 'rt') as f:
             for line in f:
                 print(line)
@@ -83,7 +84,6 @@ class Game:
         self.power_up2 = pg.sprite.Group()
         self.cactus = pg.sprite.Group()
         self.player = pg.sprite.Group()
-        self.turret = pg.sprite.Group()
         self.turret = pg.sprite.Group()
         self.bullets = pg.sprite.Group()
         self.mob_spawner = pg.sprite.Group()
@@ -179,11 +179,7 @@ class Game:
                 self.draw_text(self.screen, str(self.player.hitpoints), 100, RED, WIDTH/2 - 400, 0)
                 self.draw_text(self.screen, str("Warning, Low Health"), 100, RED, WIDTH/2 - -100, 0)
             #Displays when coin count is 5
-            if self.player.coin_count == 5:
-                 self.screen.fill(BGCOLOR)
-                 #Displays "you win! here"
-                 self.draw_text(self.screen, "You win!", 100, WHITE, WIDTH/2, HEIGHT/2)
-                 pg.display.flip()
+        
            
             #Displays the player health here.
             pg.display.flip()
@@ -216,15 +212,50 @@ class Game:
                 if event.type == pg.KEYUP:
                     waiting = False
 
+class Gamemode():
+    def __init__(self):
+        self.player = Player()
+        self.turret = Turret()
+        self.mob2 = Mob2()
+        self.game = Game()
+        self.screen = pg.display.set_mode((WIDTH, HEIGHT))
+        pg.display.flip()
+    def collect_the_coin(self):
+        self.player.coin_count = 0
+        if self.player.coin_count == 5:
+            self.screen.fill(BGCOLOR)
+                 #Displays "you win! here"
+            self.game.draw_text(self.screen, "You win!", 100, WHITE, WIDTH/2, HEIGHT/2)
+            pg.display.flip()
+    def capture_the_flag(self):
+        self.player.flag_count = 0
+        self.mob2.flag_count = 0
 
+    def menu(self):
+        self.screen.fill(BGCOLOR)
+        self.choice = str(input(self.game.draw_text(self.screen, """C- Collect the Coins, 
+                                            F- Capture the Flag
+                                            T-Team Deathmatch""", 24, WHITE, WIDTH/2, HEIGHT/2)))
+        if self.choice == "C":
+            self.collect_the_coin()
+        if self.choice == "F":
+            self.capture_the_flag()
+
+       
+        
+
+
+
+ 
     
 
 g = Game()
-
+m = Gamemode()
 g.show_start_screen()
 
 
 while True:
     g.new()
+    m.menu
     g.run()
     g.all_sprites.update()

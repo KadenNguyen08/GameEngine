@@ -80,6 +80,7 @@ class Player(pg.sprite.Sprite):
         self.coin_count = 0
         self.pos = vec(0,0)
         print(self.hitpoints)
+        self.flag_count = 0
 
 
     def get_keys(self):
@@ -164,7 +165,7 @@ class Player(pg.sprite.Sprite):
                     print("you can't hurt me")
             #Collisions for Cactus here
             if str(hits[0].__class__.__name__) == "Cactus":
-                # print(hits[0].__class__.__name__)
+                   # print(hits[0].__class__.__name__)
                 # print("Collided with mob")
                 self.hitpoints -= 1
             #Collisions for Healthbox here
@@ -176,7 +177,7 @@ class Player(pg.sprite.Sprite):
                 #adds 300 to player speed
                 self.speed += 300
             if str(hits[0].__class__.__name__) == "Bullet":
-                self.hitpoints -= 10
+                self.hitpoints -= 25
                 #Adds 50 points to player health if player collides
             
  
@@ -458,7 +459,7 @@ class Mob2(pg.sprite.Sprite):
         self.rect.center = self.pos
         self.rot = 0
         self.chase_distance = 500
-
+        self.flag_count = 0
         # added
         self.speed = 150
         self.chasing = False
@@ -529,7 +530,7 @@ class Turret(pg.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.image = game.turret_img
         self.rect.center = (x, y)
-        self.fire_rate = 1  # This is the fire rate of the turret in miliseconds
+        self.fire_rate = 125  # This is the fire rate of the turret in miliseconds
         self.last_fire = pg.time.get_ticks()
         #keeps track of time from when the last bullet was fired
         self.x = x
@@ -578,3 +579,4 @@ class Mob_Spawner(pg.sprite.Sprite):
             Mob2(self.game, self.rect.centerx, self.rect.centery)
         # Allows the turret to track time since spawning a mob
             self.last_fire = now
+
