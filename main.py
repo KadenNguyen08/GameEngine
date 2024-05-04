@@ -163,9 +163,7 @@ class Game:
             self.draw_text(self.screen, str(self.cooldown.event_time), 24, WHITE, WIDTH/2 - 32, 80)
             self.draw_text(self.screen, str(self.cooldown.get_countdown()), 24, WHITE, WIDTH/2 - 32, 120)
             self.draw_text(self.screen, str(self.player.hitpoints), 100, WHITE, WIDTH/2 - 400, 0)
-            self.draw_text(self.screen, str(self.player.coin_count), 100, YELLOW, WIDTH/2 - -400, 600)
-            #Displays # of coins collected
-            self.draw_text(self.screen, str("Coins"), 100, YELLOW, WIDTH/2 - -200, 600)
+            
             #Health symbol featured here
             #Coordines are 400,0
              #Changes color (green) based on health of the player in the elif statment if self.hitpoints is equal to or greater than 51.
@@ -178,6 +176,17 @@ class Game:
             if self.player.hitpoints <= 30:  
                 self.draw_text(self.screen, str(self.player.hitpoints), 100, RED, WIDTH/2 - 400, 0)
                 self.draw_text(self.screen, str("Warning, Low Health"), 100, RED, WIDTH/2 - -100, 0)
+             #Checks if collect the coin is running, displays the coin count
+            if self.collect_the_coin:
+                self.draw_text(self.screen, str(self.player.coin_count), 100, YELLOW, WIDTH/2 - -400, 600)
+            #Displays # of coins collected
+                self.draw_text(self.screen, str("Coins"), 100, YELLOW, WIDTH/2 - -200, 600)
+            #Checks if coin count is 5, then displays the screen
+            if self.player.coin_count == 5:
+                self.screen.fill(BGCOLOR)
+                 #Displays "you win! here"
+                self.draw_text(self.screen, "You win!", 100, WHITE, WIDTH/2, HEIGHT/2)
+
             #Displays when coin count is 5
         
            
@@ -211,35 +220,54 @@ class Game:
                     self.quit()
                 if event.type == pg.KEYUP:
                     waiting = False
+    def menu(self):
+        #Menu is displayed
+        menu_displayed = True
+        while menu_displayed:
+            self.screen.fill(BGCOLOR)
+            #Draws the gamemodes
+            self.draw_text(self.screen, "Choose an option:", 24, WHITE, WIDTH/2, HEIGHT/2 - 50)
+            self.draw_text(self.screen, "C - Collect the Coins", 24, WHITE, WIDTH/2, HEIGHT/2)
+            self.draw_text(self.screen, "F - Capture the Flag", 24, WHITE, WIDTH/2, HEIGHT/2 + 50)
+            self.draw_text(self.screen, "T - Team Deathmatch", 24, WHITE, WIDTH/2, HEIGHT/2 + 100)
+      
+            pg.display.flip()
 
-class Gamemode():
-    def __init__(self):
-        self.player = Player()
-        self.turret = Turret()
-        self.mob2 = Mob2()
-        self.game = Game()
-        self.screen = pg.display.set_mode((WIDTH, HEIGHT))
+            for event in pg.event.get():
+                if event.type == pg.QUIT:
+                    self.quit()
+                #Checks the key that the user chooses, will run the gamemode method if true
+                elif event.type == pg.KEYDOWN:
+                    if event.key == pg.K_c:
+                        menu_displayed = False
+                        self.new()
+                        self.run()
+                        self.collect_the_coin()
+                    
+                #Checks the key that the user chooses, will run the gamemode method if true     
+                    elif event.key == pg.K_f:
+                        self.capture_the_flag()
+                        menu_displayed = False
+                #Checks the key that the user chooses, will run the gamemode method if true
+                    elif event.key == pg.K_t:
+                    # Handle Team Deathmatch option
+                        pass  # This is a placeholder, no gamemode here yet
+
+                # The menu will exit if any keys be pressed
+                    else:
+                        menu_displayed = False
+            
+           
         pg.display.flip()
     def collect_the_coin(self):
+        #resets coin collection
         self.player.coin_count = 0
-        if self.player.coin_count == 5:
-            self.screen.fill(BGCOLOR)
-                 #Displays "you win! here"
-            self.game.draw_text(self.screen, "You win!", 100, WHITE, WIDTH/2, HEIGHT/2)
-            pg.display.flip()
+        
+
     def capture_the_flag(self):
         self.player.flag_count = 0
-        self.mob2.flag_count = 0
 
-    def menu(self):
-        self.screen.fill(BGCOLOR)
-        self.choice = str(input(self.game.draw_text(self.screen, """C- Collect the Coins, 
-                                            F- Capture the Flag
-                                            T-Team Deathmatch""", 24, WHITE, WIDTH/2, HEIGHT/2)))
-        if self.choice == "C":
-            self.collect_the_coin()
-        if self.choice == "F":
-            self.capture_the_flag()
+
 
        
         
@@ -250,12 +278,11 @@ class Gamemode():
     
 
 g = Game()
-m = Gamemode()
 g.show_start_screen()
 
 
 while True:
+    g.menu()
     g.new()
-    m.menu
     g.run()
     g.all_sprites.update()
