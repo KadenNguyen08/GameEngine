@@ -221,7 +221,9 @@ class Game:
                 if event.type == pg.KEYUP:
                     waiting = False
     def menu(self):
+
         #Menu is displayed
+        #Lines of code from 226-260 were copied from Chaptgpt and modified
         menu_displayed = True
         while menu_displayed:
             self.screen.fill(BGCOLOR)
@@ -265,7 +267,11 @@ class Game:
         
 
     def capture_the_flag(self):
-        self.player.flag_count = 0
+        pass
+
+    def team_deathmatch(self):
+        pass
+
 
 
 
