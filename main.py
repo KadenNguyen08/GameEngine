@@ -46,6 +46,7 @@ class Game:
         self.healthbox_img = pg.image.load(path.join(self.img_folder, 'red.png')).convert_alpha()
         self.speedboost_img = pg.image.load(path.join(self.img_folder, 'speed.png')).convert_alpha()
         self.turret_img = pg.image.load(path.join(self.img_folder, 'turret.png')).convert_alpha()
+        self.flag_img = pg.image.load(path.join(self.img_folder, 'red_flag.png')).convert_alpha()
         self.map_data = []
         '''
         The with statement is a context manager in Python. 
@@ -87,6 +88,7 @@ class Game:
         self.turret = pg.sprite.Group()
         self.bullets = pg.sprite.Group()
         self.mob_spawner = pg.sprite.Group()
+        self.flags = pg.sprite.Group()
         # self.player1 = Player(self, 1, 1)
         # for x in range(10, 20):
         #     Wall(self, x, 5)
@@ -117,7 +119,8 @@ class Game:
                     Turret(self,col,row)
                 if tile == 'O':
                     Mob_Spawner(self, col, row)
-
+                if tile == 'F':
+                    Flag(self, col, row)
                     
                     
     def run(self):

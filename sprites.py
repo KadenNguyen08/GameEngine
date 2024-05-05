@@ -80,7 +80,9 @@ class Player(pg.sprite.Sprite):
         self.coin_count = 0
         self.pos = vec(0,0)
         print(self.hitpoints)
-        self.flag_count = 0
+        self.flag = None
+        self.carried = False
+        
 
 
     def get_keys(self):
@@ -179,6 +181,10 @@ class Player(pg.sprite.Sprite):
             if str(hits[0].__class__.__name__) == "Bullet":
                 self.hitpoints -= 25
                 #Adds 50 points to player health if player collides
+            for hit in hits:
+                if isinstance(hit, Flag) and not self.flag and not hit.carried:
+                # Pick up the flag if the player isn't already carrying one and the flag is not carried
+                    hit.pickup_flag(self)
             
  
     def load_images(self):
@@ -197,7 +203,11 @@ class Player(pg.sprite.Sprite):
             bottom = self.rect.bottom
             self.image = self.standing_frames[self.current_frame]
             self.rect = self.image.get_rect()
-            self.rect.bottom = bottom              
+            self.rect.bottom = bottom
+    def pickup_flag(self, flag):
+        if not self.flag and not self.flag.carried:
+            self.flag = flag
+            self.flag.carried = True              
 
                    
                         
@@ -222,6 +232,7 @@ class Player(pg.sprite.Sprite):
             self.collide_with_group(self.game.power_ups, True)
         self.collide_with_group(self.game.mobs, False)
         self.collide_with_group(self.game.bullets, True)
+        self.collide_with_group(self.game.flags, False)
  
 
 
@@ -233,17 +244,42 @@ class Player(pg.sprite.Sprite):
 
 class Flag(pg.sprite.Sprite):
     def __init__(self, game, x, y):
-        self.groups = game.all_sprites, game.objects
+        self.groups = game.all_sprites, game.flags
         pg.sprite.Sprite.__init__(self, self.groups)
         self.game = game
         self.image = pg.Surface((TILESIZE, TILESIZE))
         self.image.fill(BLUE)
         self.rect = self.image.get_rect()
-        self.x = x
-        self.y = y
+        self.image = game.flag_img
         self.rect.x = x * TILESIZE
         self.rect.y = y * TILESIZE
-    pass
+        self.carried = False
+        self.player = None  # Reference to the player carrying the flag
+
+    def pickup_flag(self, player):
+        if not self.carried:
+            self.player = player
+            self.carried = True
+            player.carried = True
+
+    def drop(self):
+        if self.carried:
+            self.player = None
+            self.carried = False
+
+    def update(self):
+        # If the flag is being carried, update its position to the player's position
+        if self.carried:
+            if self.player:
+                self.rect.center = self.player.rect.center
+
+        # If the flag is not carried and collides with the base, drop it
+        if not self.carried:
+            if self.rect.colliderect(self.rect):
+                self.drop()
+
+
+
 
         
 class PewPew(pg.sprite.Sprite):
