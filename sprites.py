@@ -678,4 +678,3 @@ class Mob_Spawner(pg.sprite.Sprite):
             Mob2(self.game, self.rect.centerx, self.rect.centery)
         # Allows the turret to track time since spawning a mob
             self.last_fire = now
-

@@ -56,12 +56,15 @@ class Game:
         '''
         #defines map folder variable
         map_folder = "Maps"
+        flag_map_folder = "flag_maps"
 
 # Lists all of the map files in the folder, Copied from Chatgpt, modified
         map_files = [f for f in os.listdir(map_folder) if os.path.isfile(os.path.join(map_folder, f))]
+        flag_map_files = [f for f in os.listdir(flag_map_folder) if os.path.isfile(os.path.join(flag_map_folder, f))]
 
 # Randomly chooses a map Copied from Chatgpt, modified
         random_map_file = random.choice(map_files)
+        random_flag_map_file = random.choice(map_files)
 
 # Opens the random map file, Copied from Chatgpt, modified
         with open(os.path.join(map_folder, random_map_file), 'rt') as f:
@@ -70,6 +73,13 @@ class Game:
                 self.map_data.append(line)
             def test_method(self):
                 print("I can be called from Sprites...")
+        if self.capture_the_flag():
+            with open(os.path.join(flag_map_folder, random_flag_map_file), 'rt') as f:
+                for line in f:
+                    print(line)
+                    self.map_data.append(line)
+                def test_method(self):
+                    print("I can be called from Sprites...")
 
 
     def new(self):
