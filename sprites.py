@@ -82,6 +82,7 @@ class Player(pg.sprite.Sprite):
         print(self.hitpoints)
         self.flag = None
         self.carried = False
+    
         
 
 
@@ -277,6 +278,44 @@ class Flag(pg.sprite.Sprite):
         if not self.carried:
             if self.rect.colliderect(self.rect):
                 self.drop()
+
+class Enemy_Flag(pg.sprite.Sprite):
+    def __init__(self, game, x, y):
+        self.groups = game.all_sprites, game.flags
+        pg.sprite.Sprite.__init__(self, self.groups)
+        self.game = game
+        self.image = pg.Surface((TILESIZE, TILESIZE))
+        self.image.fill(RED)
+        self.rect = self.image.get_rect()
+        self.image = game.enemy_flag_img
+        self.rect.x = x * TILESIZE
+        self.rect.y = y * TILESIZE
+        self.carried = False
+        self.mob2 = None  # Reference to the player carrying the flag
+
+    def pickup_flag(self, mob2):
+        if not self.carried:
+            self.mob2 = mob2
+            self.carried = True
+            mob2.carried = True
+
+    def drop(self):
+        if self.carried:
+            self.player = None
+            self.carried = False
+
+    def update(self):
+        # If the flag is being carried, update its position to the player's position
+        if self.carried:
+            if self.mob2:
+                self.rect.center = self.mob2.rect.center
+
+        # If the flag is not carried and collides with the base, drop it
+        if not self.carried:
+            if self.rect.colliderect(self.rect):
+                self.drop()
+
+
 
 
 
@@ -487,6 +526,7 @@ class Mob(pg.sprite.Sprite):
         # self.collide_with_walls('y')
 
 
+
 class Mob2(pg.sprite.Sprite):
     def __init__(self, game, x, y):
         self.groups = game.all_sprites, game.mobs
@@ -495,11 +535,6 @@ class Mob2(pg.sprite.Sprite):
         self.image = pg.Surface((TILESIZE, TILESIZE))
         self.image.fill(ORANGE)
         self.rect = self.image.get_rect()
-        # self.image = game.mob_img
-        # self.image = pg.Surface((TILESIZE, TILESIZE))
-        # self.image.fill(ORANGE)
-        # self.hit_rect = MOB_HIT_RECT.copy()
-        # self.hit_rect.center = self.rect.center
         self.pos = vec(x, y) * TILESIZE
         self.vel = vec(0, 0)
         self.acc = vec(0, 0)
@@ -508,10 +543,10 @@ class Mob2(pg.sprite.Sprite):
         self.rot = 0
         self.chase_distance = 500
         self.flag_count = 0
-        # added
         self.speed = 150
         self.chasing = False
-        # self.health = MOB_HEALTH
+        self.flag = None  # Reference to the enemy flag carried by Mob2
+
     def sensor(self):
         if abs(self.rect.x - self.game.player.rect.x) < self.chase_distance and abs(self.rect.y - self.game.player.rect.y) < self.chase_distance:
             self.chasing = True
@@ -522,25 +557,41 @@ class Mob2(pg.sprite.Sprite):
         self.sensor()
         if self.chasing:
             self.rot = (self.game.player.rect.center - self.pos).angle_to(vec(1, 0))
-            # self.image = pg.transform.rotate(self.image, 45)
-            # self.rect = self.image.get_rect()
             self.rect.center = self.pos
             self.acc = vec(self.speed, 0).rotate(-self.rot)
             self.acc += self.vel * -1
             self.vel += self.acc * self.game.dt
             self.pos += self.vel * self.game.dt + 0.5 * self.acc * self.game.dt ** 2
-            # self.hit_rect.centerx = self.pos.x
             collide_with_walls(self, self.game.walls, 'x')
-            # self.hit_rect.centery = self.pos.y
             collide_with_walls(self, self.game.walls, 'y')
-            # self.rect.center = self.hit_rect.center
-            # if self.health <= 0:
-            #     self.kill()
+
+        # Check for collision with enemy flag
+        if self.flag is None:
+            flag_hits = pg.sprite.spritecollide(self, self.game.flags, False)
+            if flag_hits:
+                flag = flag_hits[0]
+                if not flag.carried:
+                    flag.pickup_flag(self)
+                    self.flag = flag
+
     def collide_with_group_mob2(self, group, kill):
         hits = pg.sprite.spritecollide(self, group, kill)
         if hits:
             if str(hits[0].__class__.__name__) == "PewPew":
                 self.mob2hitpots -= 1
+
+    def pickup_enemy_flag(self, flag):
+        if not self.flag and not self.flag.carried:
+            self.flag = flag
+            self.flag.carried = True
+
+    def drop_enemy_flag(self):
+        if self.flag:
+            self.flag.carried = False
+            self.flag = None
+
+
+        
 import pygame as pg
 
 # Add this code after the existing classes in your script

@@ -47,6 +47,7 @@ class Game:
         self.speedboost_img = pg.image.load(path.join(self.img_folder, 'speed.png')).convert_alpha()
         self.turret_img = pg.image.load(path.join(self.img_folder, 'turret.png')).convert_alpha()
         self.flag_img = pg.image.load(path.join(self.img_folder, 'red_flag.png')).convert_alpha()
+        self.enemy_flag_img = pg.image.load(path.join(self.img_folder, 'blue_flag.png')).convert_alpha()
         self.map_data = []
         '''
         The with statement is a context manager in Python. 
@@ -121,6 +122,8 @@ class Game:
                     Mob_Spawner(self, col, row)
                 if tile == 'F':
                     Flag(self, col, row)
+                if tile == 'V':
+                    Enemy_Flag(self, col, row)
                     
                     
     def run(self):
