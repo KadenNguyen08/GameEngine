@@ -141,9 +141,20 @@ class Game:
         self.playing = True
         while self.playing:
             self.dt = self.clock.tick(FPS) / 1000
+            self.places = 1
             self.events()
             self.update()
             self.draw()
+            if self.player.hitpoints == 0:
+                self.places -= 1
+                if self.places == 0:
+                    self.playing = False
+                    self.quit()
+                    self.menu()
+                    break
+
+                   
+                
     def quit(self):
          pg.quit()
          sys.exit()
@@ -202,6 +213,9 @@ class Game:
                 self.screen.fill(BGCOLOR)
                  #Displays "you win! here"
                 self.draw_text(self.screen, "You win!", 100, WHITE, WIDTH/2, HEIGHT/2)
+            if self.places == 0:
+                self.screen.fill(BGCOLOR)
+                self.draw_text(self.screen, "You died!", 100, WHITE, WIDTH/2, HEIGHT/2)
 
             #Displays when coin count is 5
         
@@ -302,9 +316,12 @@ class Game:
 g = Game()
 g.show_start_screen()
 
-
+g.menu()
 while True:
-    g.menu()
+    
     g.new()
     g.run()
     g.all_sprites.update()
+
+    if not g.playing:
+        break

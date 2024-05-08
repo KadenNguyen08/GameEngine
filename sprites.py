@@ -6,6 +6,7 @@ from utils import *
 from random import choice
 import math
 from os import path
+
 vec =pg.math.Vector2
 # needed for animated sprite
 SPRITESHEET = "theBell.png"
@@ -81,8 +82,10 @@ class Player(pg.sprite.Sprite):
         self.pos = vec(0,0)
         print(self.hitpoints)
         self.flag = None
+        self.enemy_flag = None
         self.carried = False
-    
+        self.player_carried = False
+        self.lives = 5
         
 
 
@@ -186,6 +189,9 @@ class Player(pg.sprite.Sprite):
                 if isinstance(hit, Flag) and not self.flag and not hit.carried:
                 # Pick up the flag if the player isn't already carrying one and the flag is not carried
                     hit.pickup_flag(self)
+         
+
+            
             
  
     def load_images(self):
@@ -205,10 +211,14 @@ class Player(pg.sprite.Sprite):
             self.image = self.standing_frames[self.current_frame]
             self.rect = self.image.get_rect()
             self.rect.bottom = bottom
-    def pickup_flag(self, flag):
+    def pickup_flag(self, player, flag, enemy_flag, mob2):
         if not self.flag and not self.flag.carried:
             self.flag = flag
-            self.flag.carried = True              
+            self.flag.carried = True   
+        if not self.enemy_flag and not self.enemy_flag.player_carried:
+            self.enemy_flag = enemy_flag
+            self.enemy_flag.player_carried = True        
+        
 
                    
                         
@@ -234,7 +244,11 @@ class Player(pg.sprite.Sprite):
         self.collide_with_group(self.game.mobs, False)
         self.collide_with_group(self.game.bullets, True)
         self.collide_with_group(self.game.flags, False)
- 
+        flag_hits = pg.sprite.spritecollide(self, self.game.flags, False)
+        if flag_hits:
+            flag = flag_hits[0]
+            if not flag.carried:
+                flag.pickup_flag(self)
 
 
  
@@ -285,35 +299,33 @@ class Enemy_Flag(pg.sprite.Sprite):
         pg.sprite.Sprite.__init__(self, self.groups)
         self.game = game
         self.image = pg.Surface((TILESIZE, TILESIZE))
-        self.image.fill(RED)
+        self.image.fill(RED)  # Adjust color as needed
         self.rect = self.image.get_rect()
-        self.image = game.enemy_flag_img
+        self.image = game.enemy_flag_img  # Use the appropriate image
         self.rect.x = x * TILESIZE
         self.rect.y = y * TILESIZE
         self.carried = False
-        self.mob2 = None  # Reference to the player carrying the flag
+        self.carrier = None  # Reference to the entity carrying the flag
 
-    def pickup_flag(self, mob2):
+    def pickup_flag(self, entity):
         if not self.carried:
-            self.mob2 = mob2
+            self.carrier = entity
             self.carried = True
-            mob2.carried = True
 
-    def drop(self):
+    def drop_flag(self):
         if self.carried:
-            self.player = None
+            self.carrier = None
             self.carried = False
 
     def update(self):
-        # If the flag is being carried, update its position to the player's position
-        if self.carried:
-            if self.mob2:
-                self.rect.center = self.mob2.rect.center
+        # If the flag is being carried, update its position to the carrier's position
+        if self.carried and self.carrier:
+            self.rect.center = self.carrier.rect.center
 
         # If the flag is not carried and collides with the base, drop it
         if not self.carried:
-            if self.rect.colliderect(self.rect):
-                self.drop()
+            if self.rect.colliderect(self.rect):  # Adjust collision condition as needed
+                self.drop_flag()
 
 
 
@@ -564,6 +576,11 @@ class Mob2(pg.sprite.Sprite):
             self.pos += self.vel * self.game.dt + 0.5 * self.acc * self.game.dt ** 2
             collide_with_walls(self, self.game.walls, 'x')
             collide_with_walls(self, self.game.walls, 'y')
+            flag_hits = pg.sprite.spritecollide(self, self.game.flags, False)
+            if flag_hits:
+                flag = flag_hits[0]
+                if not flag.carried:
+                    flag.pickup_flag(self)
 
         # Check for collision with enemy flag
         if self.flag is None:
@@ -678,3 +695,4 @@ class Mob_Spawner(pg.sprite.Sprite):
             Mob2(self.game, self.rect.centerx, self.rect.centery)
         # Allows the turret to track time since spawning a mob
             self.last_fire = now
+
