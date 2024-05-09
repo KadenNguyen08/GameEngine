@@ -100,6 +100,7 @@ class Game:
         self.bullets = pg.sprite.Group()
         self.mob_spawner = pg.sprite.Group()
         self.flags = pg.sprite.Group()
+        self.team = pg.sprite.Group()
         # self.player1 = Player(self, 1, 1)
         # for x in range(10, 20):
         #     Wall(self, x, 5)
@@ -134,6 +135,11 @@ class Game:
                     Flag(self, col, row)
                 if tile == 'V':
                     Enemy_Flag(self, col, row)
+                if tile == 'A':
+                    MobC(self, col, row)
+                if tile == 'U':
+                    Mob(self, col, row)
+                
                     
                     
     def run(self):
@@ -145,13 +151,6 @@ class Game:
             self.events()
             self.update()
             self.draw()
-            if self.player.hitpoints == 0:
-                self.places -= 1
-                if self.places == 0:
-                    self.playing = False
-                    self.quit()
-                    self.menu()
-                    break
 
                    
                 
@@ -323,5 +322,3 @@ while True:
     g.run()
     g.all_sprites.update()
 
-    if not g.playing:
-        break
