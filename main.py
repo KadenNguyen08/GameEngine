@@ -16,6 +16,7 @@ from random import choice
 import os
 from random import choice
 import random
+from main import *
 '''Beta Goals
    
 1. More interesting enemies
@@ -28,6 +29,10 @@ Credits: Mr. Cozort's Github, Chatgpt
 class Game:
 
     def __init__(self):
+  
+
+
+        
        
         pg.init()
         pg.mixer.init()
@@ -100,7 +105,8 @@ class Game:
         self.bullets = pg.sprite.Group()
         self.mob_spawner = pg.sprite.Group()
         self.flags = pg.sprite.Group()
-        self.team = pg.sprite.Group()
+        #self.team = pg.sprite.Group()
+        self.ammo = pg.sprite.Group
         # self.player1 = Player(self, 1, 1)
         # for x in range(10, 20):
         #     Wall(self, x, 5)
@@ -129,16 +135,19 @@ class Game:
                     SpeedBoost(self, col, row)
                 if tile == 'T':
                     Turret(self,col,row)
-                if tile == 'O':
-                    Mob_Spawner(self, col, row)
+
                 if tile == 'F':
                     Flag(self, col, row)
                 if tile == 'V':
                     Enemy_Flag(self, col, row)
                 if tile == 'A':
-                    MobC(self, col, row)
+                    Mobc(self, col, row)
                 if tile == 'U':
                     Mob(self, col, row)
+                #aaaif tile == 'K':
+                    #Teammate(self, col, row)
+                    
+
                 
                     
                     
@@ -281,7 +290,7 @@ class Game:
                         menu_displayed = False
                 #Checks the key that the user chooses, will run the gamemode method if true
                     elif event.key == pg.K_t:
-                    # Handle Team Deathmatch option
+                    # Handle Team Deathmatsch option
                         pass  # This is a placeholder, no gamemode here yet
 
                 # The menu will exit if any keys be pressed

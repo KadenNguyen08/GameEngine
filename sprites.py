@@ -7,6 +7,8 @@ from random import choice
 import math
 from os import path
 
+
+
 vec =pg.math.Vector2
 # needed for animated sprite
 SPRITESHEET = "theBell.png"
@@ -84,7 +86,6 @@ class Player(pg.sprite.Sprite):
         self.flag = None
         self.enemy_flag = None
         self.carried = False
-        self.player_carried = False
         self.lives = 5
     
         
@@ -126,7 +127,7 @@ class Player(pg.sprite.Sprite):
     #             return True
     #     return False
             
-    def collide_with_walls(self, dir):
+    def collide_with_walls(self, dir): 
         if dir == 'x':
             hits = pg.sprite.spritecollide(self, self.game.walls, False)
             if hits:
@@ -213,11 +214,15 @@ class Player(pg.sprite.Sprite):
             self.image = self.standing_frames[self.current_frame]
             self.rect = self.image.get_rect()
             self.rect.bottom = bottom
-    def pickup_flag(self, flag):
-        if not self.flag and not flag.carried:
+
+    def pickup_enemy_flag(self, flag):
+        if self.flag is None:
+        #checks if the self.flag attribute is none
             self.flag = flag
-            self.flag.carried = True
-            flag.player = self       
+            #picks up flag here
+
+            self.flag.carried = True      
+            #sets carried to True
         
 
                    
@@ -257,7 +262,7 @@ class Player(pg.sprite.Sprite):
         # if coin_hits:
         #     print("I got a coin")
 
-class Flag(pg.sprite.Sprite):
+class Enemy_Flag(pg.sprite.Sprite):
     def __init__(self, game, x, y):
         self.groups = game.all_sprites, game.flags
         pg.sprite.Sprite.__init__(self, self.groups)
@@ -270,66 +275,73 @@ class Flag(pg.sprite.Sprite):
         self.rect.y = y * TILESIZE
         self.carried = False
         self.player = None  # Reference to the player carrying the flag
-
+        self.mobc = None
     def pickup_flag(self, player):
         if not self.carried:
             self.player = player
             self.carried = True
             player.carried = True
-
+    def pickup(self, mobc):
+        if not self.carried:
+            self.mobc = mobc
+            self.carried = True
+            mobc.carried = True
     def drop(self):
         if self.carried:
             self.player = None
             self.carried = False
-
     def update(self):
         # If the flag is being carried, update its position to the player's position
         if self.carried:
             if self.player:
                 self.rect.center = self.player.rect.center
-
+            if self.mobc:
+                self.rect.center = self.mobc.rect.center
         # If the flag is not carried and collides with the base, drop it
         if not self.carried:
             if self.rect.colliderect(self.rect):
                 self.drop()
+     
 
-class Enemy_Flag(pg.sprite.Sprite):
+class Flag(pg.sprite.Sprite):
     def __init__(self, game, x, y):
         self.groups = game.all_sprites, game.flags
         pg.sprite.Sprite.__init__(self, self.groups)
         self.game = game
         self.image = pg.Surface((TILESIZE, TILESIZE))
-        self.image.fill(RED)  # Adjust color as needed
+        self.image.fill(BLUE)
         self.rect = self.image.get_rect()
-        self.image = game.enemy_flag_img  # Use the appropriate image
+        self.image = game.flag_img
         self.rect.x = x * TILESIZE
         self.rect.y = y * TILESIZE
         self.carried = False
-        self.carrier = None  # Reference to the entity carrying the flag
-
-    def pickup_flag(self, entity):
+        self.mobc = None
+        self.player = None  # Reference to the player carrying the flag
+    def pickup_flag(self, player):
         if not self.carried:
-            self.carrier = entity
+            self.player = player
             self.carried = True
-
-    def drop_flag(self):
+            player.carried = True
+    def pickup(self, mobc):
+        if not self.carried:
+            self.mobc = mobc
+            self.carried = True
+            mobc.carried = True
+    def drop(self):
         if self.carried:
-            self.carrier = None
+            self.mobc = None
             self.carried = False
-
     def update(self):
-        # If the flag is being carried, update its position to the carrier's position
-        if self.carried and self.carrier:
-            self.rect.center = self.carrier.rect.center
-
+        # If the flag is being carried, update its position to the player's position
+        if self.carried:
+            if self.mobc:
+                self.rect.center = self.mobc.rect.center
+            if self.player:
+                self.rect.center = self.player.rect.center
         # If the flag is not carried and collides with the base, drop it
         if not self.carried:
-            if self.rect.colliderect(self.rect):  # Adjust collision condition as needed
-                self.drop_flag()
-
-
-
-
+            if self.rect.colliderect(self.rect):
+                self.drop()
 
 
         
@@ -559,6 +571,7 @@ class Mob2(pg.sprite.Sprite):
         self.chasing = False
         self.flag = None  # Reference to the enemy flag carried by Mob2
 
+
     def sensor(self):
         if abs(self.rect.x - self.game.player.rect.x) < self.chase_distance and abs(self.rect.y - self.game.player.rect.y) < self.chase_distance:
             self.chasing = True
@@ -580,7 +593,7 @@ class Mob2(pg.sprite.Sprite):
             if flag_hits:
                 flag = flag_hits[0]
                 if not flag.carried:
-                    flag.pickup_flag(self)
+                    flag.pickup(self)
 
         # Check for collision with enemy flag
         if self.flag is None:
@@ -588,7 +601,7 @@ class Mob2(pg.sprite.Sprite):
             if flag_hits:
                 flag = flag_hits[0]
                 if not flag.carried:
-                    flag.pickup_flag(self)
+                    flag.pickup(self)
                     self.flag = flag
 
     def collide_with_group_mob2(self, group, kill):
@@ -634,6 +647,26 @@ class Bullet(pg.sprite.Sprite):
      
 
 
+class Bullett(pg.sprite.Sprite):
+    def __init__(self, game, x, y, direction):
+        self.groups = game.all_sprites, game.ammo
+        pg.sprite.Sprite.__init__(self, self.groups)
+        self.game = game
+        self.image = pg.Surface((TILESIZE/4, TILESIZE/4))
+        self.image.fill(RED)
+        self.rect = self.image.get_rect()
+        self.rect.center = (x, y)
+        self.direction = direction
+        self.speed = 10
+        #Defeins velocity
+        self.velocity = self.direction * self.speed
+
+    def update(self):
+      #Updates coordinates  
+        self.rect.x += self.velocity.x
+        self.rect.y += self.velocity.y
+
+
             
 #new turret class
 class Turret(pg.sprite.Sprite):
@@ -668,34 +701,7 @@ class Turret(pg.sprite.Sprite):
             Bullet(self.game, self.rect.centerx, self.rect.centery, direction)
             #allows the turret to track time since shooting
             self.last_fire = now
-
-class Mob_Spawner(pg.sprite.Sprite):
-    def __init__(self, game, x, y):
-        self.groups = game.all_sprites, game.mob_spawner
-        pg.sprite.Sprite.__init__(self, self.groups)
-        self.game = game
-        self.image = pg.Surface((TILESIZE, TILESIZE))
-        self.image.fill(ORANGE)  # Adjust color as needed
-        self.rect = self.image.get_rect()
-        self.rect.center = (x, y)
-        self.fire_rate = 0  # This is the fire rate of the turret in miliseconds
-        self.last_fire = pg.time.get_ticks()
-        #keeps track of time from when the last bullet was fired
-        self.x = x
-        self.y = y
-        self.rect.x = x * TILESIZE
-        self.rect.y = y * TILESIZE
-    def update(self):
-    # Gets the time in milliseconds
-        now = pg.time.get_ticks()
-    # Calculates the time that has passed since the last mob was spawned,
-    # spawns another mob if the time that has passed is greater than or equal to the fire rate
-        if now - self.last_fire >= self.fire_rate:
-        # Creates an instance of the mob class (Mob2)
-            Mob2(self.game, self.rect.centerx, self.rect.centery)
-        # Allows the turret to track time since spawning a mob
-            self.last_fire = now
-class MobC(pg.sprite.Sprite):
+class Mobc(pg.sprite.Sprite):
     def __init__(self, game, x, y):
         self.groups = game.all_sprites, game.mobs
         pg.sprite.Sprite.__init__(self, self.groups)
@@ -713,9 +719,11 @@ class MobC(pg.sprite.Sprite):
         self.flag_count = 0
         self.speed = 150
         self.chasing = False
-        self.fire_rate = 1000  # This is the fire rate of the turret in miliseconds
-        self.last_fire = pg.time.get_ticks()
         self.flag = None  # Reference to the enemy flag carried by Mob2
+        self.fire_rate = 125  # This is the fire rate of the turret in miliseconds
+        self.last_fire = pg.time.get_ticks()
+        
+
 
     def sensor(self):
         if abs(self.rect.x - self.game.player.rect.x) < self.chase_distance and abs(self.rect.y - self.game.player.rect.y) < self.chase_distance:
@@ -738,7 +746,7 @@ class MobC(pg.sprite.Sprite):
             if flag_hits:
                 flag = flag_hits[0]
                 if not flag.carried:
-                    flag.pickup_flag(self)
+                    flag.pickup(self)
 
         # Check for collision with enemy flag
         if self.flag is None:
@@ -746,9 +754,8 @@ class MobC(pg.sprite.Sprite):
             if flag_hits:
                 flag = flag_hits[0]
                 if not flag.carried:
-                    flag.pickup_flag(self)
+                    flag.pickup(self)
                     self.flag = flag
-        #gets the time in milliseconds
         now = pg.time.get_ticks()
         #calculates the time that has passed since the last bullet was fired, fires another bullet if the time that has 
         #passed is greater than or equal to the fire rate
@@ -762,6 +769,7 @@ class MobC(pg.sprite.Sprite):
             Bullet(self.game, self.rect.centerx, self.rect.centery, direction)
             #allows the turret to track time since shooting
             self.last_fire = now
+        
 
     def collide_with_group_mob2(self, group, kill):
         hits = pg.sprite.spritecollide(self, group, kill)
@@ -775,110 +783,12 @@ class MobC(pg.sprite.Sprite):
             self.flag.carried = True
 
     def drop_enemy_flag(self):
-        if self.flag:
+        if self.kill():
+            print("Test")
             self.flag.carried = False
             self.flag = None
 
-class MobC(pg.sprite.Sprite):
-    def __init__(self, game, x, y):
-        self.groups = game.all_sprites, game.mobs
-        pg.sprite.Sprite.__init__(self, self.groups)
-        self.game = game
-        self.image = pg.Surface((TILESIZE, TILESIZE))
-        self.image.fill(ORANGE)
-        self.rect = self.image.get_rect()
-        self.pos = vec(x, y) * TILESIZE
-        self.vel = vec(0, 0)
-        self.acc = vec(0, 0)
-        self.mob2hitpots = 100
-        self.rect.center = self.pos
-        self.rot = 0
-        self.chase_distance = 500
-        self.flag_count = 0
-        self.speed = 150
-        self.chasing = False
-        self.fire_rate = 1000  # This is the fire rate of the turret in miliseconds
-        self.last_fire = pg.time.get_ticks()
-        self.flag = None  # Reference to the enemy flag carried by Mob2
-
-    def sensor(self):
-        if abs(self.rect.x - self.game.player.rect.x) < self.chase_distance and abs(self.rect.y - self.game.player.rect.y) < self.chase_distance:
-            self.chasing = True
-        else:
-            self.chasing = False
-
-    def update(self):
-        self.sensor()
-        if self.chasing:
-            self.rot = (self.game.player.rect.center - self.pos).angle_to(vec(1, 0))
-            self.rect.center = self.pos
-            self.acc = vec(self.speed, 0).rotate(-self.rot)
-            self.acc += self.vel * -1
-            self.vel += self.acc * self.game.dt
-            self.pos += self.vel * self.game.dt + 0.5 * self.acc * self.game.dt ** 2
-            collide_with_walls(self, self.game.walls, 'x')
-            collide_with_walls(self, self.game.walls, 'y')
-            flag_hits = pg.sprite.spritecollide(self, self.game.flags, False)
-            if flag_hits:
-                flag = flag_hits[0]
-                if not flag.carried:
-                    flag.pickup_flag(self)
-
-        # Check for collision with enemy flag
-        if self.flag is None:
-            flag_hits = pg.sprite.spritecollide(self, self.game.flags, False)
-            if flag_hits:
-                flag = flag_hits[0]
-                if not flag.carried:
-                    flag.pickup_flag(self)
-                    self.flag = flag
-        #gets the time in milliseconds
-        now = pg.time.get_ticks()
-        #calculates the time that has passed since the last bullet was fired, fires another bullet if the time that has 
-        #passed is greater than or equal to the fire rate
-        if now - self.last_fire >= self.fire_rate:
-            # This line calculates the bullet's direction to the player
-            direction = vec(self.game.player.rect.center) - vec(self.rect.center)
-            #Creates a vector from the turret to the player.
-            #Ensures that the bullet travels at a constant speed regardless of distance
-            direction = direction.normalize()
-            # Creates an instance of the bullet class
-            Bullet(self.game, self.rect.centerx, self.rect.centery, direction)
-            #allows the turret to track time since shooting
-            self.last_fire = now
-
-    def collide_with_group_mob2(self, group, kill):
-        hits = pg.sprite.spritecollide(self, group, kill)
-        if hits:
-            if str(hits[0].__class__.__name__) == "PewPew":
-                self.mob2hitpots -= 1
-
-    def pickup_enemy_flag(self, flag):
-        if not self.flag and not self.flag.carried:
-            self.flag = flag
-            self.flag.carried = True
-
-    def drop_enemy_flag(self):
-        if self.flag:
-            self.flag.carried = False
-            self.flag = None
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    
 
 
 
