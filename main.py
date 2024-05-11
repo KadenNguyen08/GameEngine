@@ -17,8 +17,9 @@ import os
 from random import choice
 import random
 from main import *
+from sprites import Mobc
 '''Beta Goals
-   
+  
 1. More interesting enemies
 2. Game Goal and End
 3. More maps
@@ -43,7 +44,7 @@ class Game:
         self.clock = pg.time.Clock()
         self.load_data()
         self.playing = True
-       
+      
     def load_data(self):
         self.game_folder = path.dirname(__file__)
         self.img_folder = path.join(self.game_folder, 'images')
@@ -51,8 +52,7 @@ class Game:
         self.healthbox_img = pg.image.load(path.join(self.img_folder, 'red.png')).convert_alpha()
         self.speedboost_img = pg.image.load(path.join(self.img_folder, 'speed.png')).convert_alpha()
         self.turret_img = pg.image.load(path.join(self.img_folder, 'turret.png')).convert_alpha()
-        self.flag_img = pg.image.load(path.join(self.img_folder, 'red_flag.png')).convert_alpha()
-        self.enemy_flag_img = pg.image.load(path.join(self.img_folder, 'blue_flag.png')).convert_alpha()
+   
         self.map_data = []
         '''
         The with statement is a context manager in Python. 
@@ -78,13 +78,6 @@ class Game:
                 self.map_data.append(line)
             def test_method(self):
                 print("I can be called from Sprites...")
-        if self.capture_the_flag():
-            with open(os.path.join(flag_map_folder, random_flag_map_file), 'rt') as f:
-                for line in f:
-                    print(line)
-                    self.map_data.append(line)
-                def test_method(self):
-                    print("I can be called from Sprites...")
 
 
     def new(self):
@@ -104,7 +97,7 @@ class Game:
         self.turret = pg.sprite.Group()
         self.bullets = pg.sprite.Group()
         self.mob_spawner = pg.sprite.Group()
-        self.flags = pg.sprite.Group()
+     
         #self.team = pg.sprite.Group()
         self.ammo = pg.sprite.Group
         # self.player1 = Player(self, 1, 1)
@@ -136,12 +129,10 @@ class Game:
                 if tile == 'T':
                     Turret(self,col,row)
 
-                if tile == 'F':
-                    Flag(self, col, row)
-                if tile == 'V':
-                    Enemy_Flag(self, col, row)
                 if tile == 'A':
-                    Mobc(self, col, row)
+                    self.mobc = Mobc(self, col, row)
+
+               
                 if tile == 'U':
                     Mob(self, col, row)
                 #aaaif tile == 'K':
@@ -191,6 +182,7 @@ class Game:
     
     def draw(self):
             self.screen.fill(BGCOLOR)
+
           
             self.all_sprites.draw(self.screen)
     
@@ -198,6 +190,10 @@ class Game:
             self.draw_text(self.screen, str(self.cooldown.event_time), 24, WHITE, WIDTH/2 - 32, 80)
             self.draw_text(self.screen, str(self.cooldown.get_countdown()), 24, WHITE, WIDTH/2 - 32, 120)
             self.draw_text(self.screen, str(self.player.hitpoints), 100, WHITE, WIDTH/2 - 400, 0)
+            self.draw_text(self.screen, str(self.mobc.mob2hitpots), 100, WHITE, WIDTH/2 - 300, 0)
+            self.draw_text(self.screen, str(), 100, WHITE, WIDTH/2 - 400, 0)
+            
+  
             
             #Health symbol featured here
             #Coordines are 400,0
