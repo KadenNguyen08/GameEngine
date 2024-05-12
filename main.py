@@ -44,11 +44,17 @@ class Game:
         self.clock = pg.time.Clock()
         self.load_data()
         self.playing = True
+
         self.mob_wave = 1
+        #Starts first wave of mobs
         self.mob_spawn_time = 0
+        #Time since last mob spawn, will increase as game goes on
         self.mob_spawn_interval = 1
+        #Ticks between each spawn
         self.dt = 0
+        #time past since last frame update, ensures smooth movement
         self.player_death_time = None
+        #this variable is the amoutn of time the moment the player died, player has no died yet, so it is set to none.
 
       
     def load_data(self):
@@ -60,16 +66,17 @@ class Game:
         self.speedboost_img = pg.image.load(path.join(self.img_folder, 'speed.png')).convert_alpha()
         self.turret_img = pg.image.load(path.join(self.img_folder, 'turret.png')).convert_alpha()
         self.s = False
+        #S is a condition and placeholder detecking when the waves function is running, will open flag maps folder if running
         self.c = False
         self.map_data = []
-
+        #Different map folder for different Gamemodes
         if self.s == True:
             self.load_data_w()
         if self.c == True:
             self.load_data_c()
     
         
-        # Define the default map folder
+      
 
         
     def load_data_w(self):
@@ -181,9 +188,9 @@ class Game:
             self.events()
             self.update()
             self.draw()
-            if self.s:  # Check if s is True
+            if self.s:  # Check if s is True, will run waves (apocalypse) if true
                 self.waves()
-            self.mob_spawn_time += self.dt
+            self.mob_spawn_time += self.dt#Keeps track of when the time is to spawn the next mob, updates it prettymuch
             if self.player.hitpoints <= 0:
             # If the player is dead, set playing to False to exit the game loop
                 self.player_death_time = pg.time.get_ticks() / 1000
@@ -240,6 +247,13 @@ class Game:
         if self.c:
             self.draw_text(self.screen, str(self.player.coin_count), 100, YELLOW, WIDTH/2 - -400, 600)
             self.draw_text(self.screen, str("Coins"), 100, YELLOW, WIDTH/2 - -200, 600)
+        elif self.player.hitpoints <= 50:
+                #Changes color (yellow) based on health of the player in the elif statment if self.hitpoints is less than or equal to 50.
+                self.draw_text(self.screen, str(self.player.hitpoints), 100, YELLOW, WIDTH/2 - 400, 0)
+                    #Changes color (red) based on health of the player in the elif statment if self.hitpoints is less than or equal to 30, gives a low health warning.
+        if self.player.hitpoints <= 30:  
+            self.draw_text(self.screen, str(self.player.hitpoints), 100, RED, WIDTH/2 - 400, 0)
+            self.draw_text(self.screen, str("Warning, Low Health"), 100, RED, WIDTH/2 - -100, 0)
     
 
         
@@ -250,9 +264,11 @@ class Game:
             self.screen.fill(BGCOLOR)
             self.draw_text(self.screen, "You win!", 100, WHITE, WIDTH/2, HEIGHT/2)
         if self.s and self.player.hitpoints == 0 and self.player_death_time is not None:
+            #Prints out how many secodns the player survived for
          
             self.screen.fill(BGCOLOR)
             self.draw_text(self.screen, f"Time of death (Seconds): {self.player_death_time}", 24, WHITE, WIDTH/2 - 32, 80)
+            self.playing = False
 
           
 
@@ -313,7 +329,7 @@ class Game:
                     if event.key == pg.K_w:
                         menu_displayed = False
                         self.waves()
-                        self.s == True  # Set self.s to True for flag_maps selection
+                        self.s == True  # Set self.s for selection, will run apocalypse mode
                         self.c == False
                        
                         self.new()
@@ -335,38 +351,45 @@ class Game:
            
         pg.display.flip()
     def collect_the_coin(self):
-        #resets coin collection
+ 
         self.load_data_c()
-        #self.player.coin_count = 0
+        #Load_data_c-loads the maps in the maps folder
+    
         
 
     def waves(self):
         self.s = True
         self.load_data_w()
+        #loads map from flag_mas folder
     
-    # Set a suitable spawn interval (for example, 5 seconds)
+    # 5- Mob spawns every 5 ticks
         spawn_interval = 5
-    
+    #Copied and modified from Chaptpgt
     # Check if it's time to spawn mobs
         if self.mob_spawn_time >= spawn_interval:
+            #Checks if the spawn time is greater than the time interval
             for i in range(self.mob_wave):
-            # Choose a random position until a valid one is found
+            # Will run the loop if this is true-mob_wave-the number of mobs in each wave, will slowly increase
                 valid_position = False
+                #Loop searches for valid_position for the mob to spawn in, no valid position yet for the mob to spawn, will be set to true if a valid position is found
                 while not valid_position:
                     mob_x = randint(0, WIDTH // TILESIZE - 1)
                     mob_y = randint(0, HEIGHT // TILESIZE - 1)
-                # Check if the chosen position is not a wall
+                    #Generates random coordinates for the mob to spawn in
+                # This checks if the position is not a wall, will spawn a mob if not a wall
                     if not any(isinstance(sprite, Wall) for sprite in self.all_sprites if sprite.rect.collidepoint(mob_x * TILESIZE, mob_y * TILESIZE)):
                         valid_position = True
+                        #valid position will be set to true if not a wall
                 Mobc(self, mob_x, mob_y)
+                #Creates instances of the Mobc class
         
-        # Increase the wave number
+        # Increases the wave of mobs
             self.mob_wave += 1
         
-        # Reset the mob spawn time
+        # Spawn time between each mob
             self.mob_spawn_time = 0
     
-    # Update the mob spawn time
+    #This updates the spawn time
    
         self.mob_spawn_time += self.dt
         

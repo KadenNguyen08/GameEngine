@@ -470,6 +470,7 @@ class Mob2(pg.sprite.Sprite):
         self.chasing = False
         self.deaths = 28
         #keeps track of deaths
+   
 
 
 #Code from Mob2
@@ -490,6 +491,9 @@ class Mob2(pg.sprite.Sprite):
             self.pos += self.vel * self.game.dt + 0.5 * self.acc * self.game.dt ** 2
             collide_with_walls(self, self.game.walls, 'x')
             collide_with_walls(self, self.game.walls, 'y')
+            if self.mob2hitpots == 0:
+                self.die()
+                self.kill()
     
 
         # Check for collision with enemy flag
@@ -504,6 +508,10 @@ class Mob2(pg.sprite.Sprite):
         if hits:
             if str(hits[0].__class__.__name__) == "PewPew":
                 self.mob2hitpots -= 100
+    def die(self):
+        for group in self.groups:
+            group.remove(self)
+            self.death_count += 1
 
 
 
@@ -567,7 +575,7 @@ class Turret(pg.sprite.Sprite):
             Bullet(self.game, self.rect.centerx, self.rect.centery, direction)
             #allows the turret to track time since shooting
             self.last_fire = now
-waves = 0
+
 class Mobc(pg.sprite.Sprite):
     def __init__(self, game, x, y):
         self.groups = game.all_sprites, game.mobs
@@ -632,7 +640,7 @@ class Mobc(pg.sprite.Sprite):
             direction = direction.normalize()
             # Creates an instance of the bullet class
             Bullet(self.game, self.rect.centerx, self.rect.centery, direction)
-            #allows the turret to track time since shooting
+            #allows the mob to track time since shooting
             self.last_fire = now
         
 
@@ -643,11 +651,12 @@ class Mobc(pg.sprite.Sprite):
 
                 self.mob2hitpots -= 100
  
-                #Adds to coin score
+            
     def die(self):
         for group in self.groups:
             group.remove(self)
             self.death_count += 1
+            #removes the mob if it run out of health
      
 
 
