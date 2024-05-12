@@ -185,7 +185,7 @@ class Player(pg.sprite.Sprite):
                 #adds 300 to player speed
                 self.speed += 300
             if str(hits[0].__class__.__name__) == "Bullet":
-                self.hitpoints -= 100
+                self.hitpoints -= 1
                 #Adds 50 points to player health if player collides
    
 
@@ -491,6 +491,7 @@ class Mob2(pg.sprite.Sprite):
             self.pos += self.vel * self.game.dt + 0.5 * self.acc * self.game.dt ** 2
             collide_with_walls(self, self.game.walls, 'x')
             collide_with_walls(self, self.game.walls, 'y')
+            self.collide_with_group_mob2(self.game.pew_pews, True)
             if self.mob2hitpots == 0:
                 self.die()
                 self.kill()
@@ -511,7 +512,7 @@ class Mob2(pg.sprite.Sprite):
     def die(self):
         for group in self.groups:
             group.remove(self)
-            self.death_count += 1
+      
 
 
 
@@ -624,24 +625,22 @@ class Mobc(pg.sprite.Sprite):
             collide_with_walls(self, self.game.walls, 'x')
             collide_with_walls(self, self.game.walls, 'y')
             self.collide_with_group(self.game.pew_pews, False)
-            #flag_hits = pg.sprite.spritecollide(self, self.game.flags, False)
+        #flag_hits = pg.sprite.spritecollide(self, self.game.flags, False)
             if self.mob2hitpots == 0:
                 self.die()
                 self.kill()
-
+        #From Chatgpt
         now = pg.time.get_ticks()
-        #calculates the time that has passed since the last bullet was fired, fires another bullet if the time that has 
-        #passed is greater than or equal to the fire rate
         if now - self.last_fire >= self.fire_rate:
-            # This line calculates the bullet's direction to the player
+        # This line calculates the bullet's direction to the player
             direction = vec(self.game.player.rect.center) - vec(self.rect.center)
-            #Creates a vector from the turret to the player.
-            #Ensures that the bullet travels at a constant speed regardless of distance
-            direction = direction.normalize()
-            # Creates an instance of the bullet class
+            if direction.length() > 0:
+                direction = direction.normalize()
+            else:
+                direction = vec(1, 0)  # Default direction
             Bullet(self.game, self.rect.centerx, self.rect.centery, direction)
-            #allows the mob to track time since shooting
             self.last_fire = now
+
         
 
     def collide_with_group(self, group, kill):

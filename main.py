@@ -193,6 +193,8 @@ class Game:
             self.mob_spawn_time += self.dt#Keeps track of when the time is to spawn the next mob, updates it prettymuch
             if self.player.hitpoints <= 0:
             # If the player is dead, set playing to False to exit the game loop
+            #Copied and modified from Chaptgpt
+
                 self.player_death_time = pg.time.get_ticks() / 1000
                 self.draw()
                 self.playing = False
@@ -244,9 +246,7 @@ class Game:
        
         if self.player.hitpoints == 30:
             self.draw_text(self.screen, str(self.player.hitpoints), 100, RED, WIDTH/2 - 400, 0)
-        if self.c:
-            self.draw_text(self.screen, str(self.player.coin_count), 100, YELLOW, WIDTH/2 - -400, 600)
-            self.draw_text(self.screen, str("Coins"), 100, YELLOW, WIDTH/2 - -200, 600)
+        
         elif self.player.hitpoints <= 50:
                 #Changes color (yellow) based on health of the player in the elif statment if self.hitpoints is less than or equal to 50.
                 self.draw_text(self.screen, str(self.player.hitpoints), 100, YELLOW, WIDTH/2 - 400, 0)
@@ -254,6 +254,9 @@ class Game:
         if self.player.hitpoints <= 30:  
             self.draw_text(self.screen, str(self.player.hitpoints), 100, RED, WIDTH/2 - 400, 0)
             self.draw_text(self.screen, str("Warning, Low Health"), 100, RED, WIDTH/2 - -100, 0)
+        if self.c is not False:
+            self.draw_text(self.screen, str(self.player.coin_count), 100, YELLOW, WIDTH/2 - -400, 600)
+            self.draw_text(self.screen, str("Coins"), 100, YELLOW, WIDTH/2 - -200, 600)
     
 
         
@@ -353,6 +356,7 @@ class Game:
     def collect_the_coin(self):
  
         self.load_data_c()
+       
         #Load_data_c-loads the maps in the maps folder
     
         
