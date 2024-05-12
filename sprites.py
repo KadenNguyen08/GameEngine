@@ -78,7 +78,7 @@ class Player(pg.sprite.Sprite):
         self.moneybag = 0
         self.speed = 300
         self.status = ""
-        self.hitpoints = 10000
+        self.hitpoints = 100
         self.cooling = False
         #sets the initial value of coin_count
         self.coin_count = 0
@@ -185,7 +185,7 @@ class Player(pg.sprite.Sprite):
                 #adds 300 to player speed
                 self.speed += 300
             if str(hits[0].__class__.__name__) == "Bullet":
-                self.hitpoints -= 1
+                self.hitpoints -= 100
                 #Adds 50 points to player health if player collides
    
 
@@ -592,7 +592,7 @@ class Mobc(pg.sprite.Sprite):
         self.rect.x = x * TILESIZE
         self.rect.y = y * TILESIZE
         #Keeps track of deaths
-        self.death_count = 28
+        self.death_count = 0
 
  
     def sensor(self):
@@ -647,7 +647,7 @@ class Mobc(pg.sprite.Sprite):
     def die(self):
         for group in self.groups:
             group.remove(self)
-            self.death_count -= 1
+            self.death_count += 1
      
 
 

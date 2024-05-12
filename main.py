@@ -44,6 +44,12 @@ class Game:
         self.clock = pg.time.Clock()
         self.load_data()
         self.playing = True
+        self.mob_wave = 1
+        self.mob_spawn_time = 0
+        self.mob_spawn_interval = 1
+        self.dt = 0
+        self.player_death_time = None
+
       
     def load_data(self):
         
@@ -75,6 +81,7 @@ class Game:
             for line in f:
                 print(line)
                 self.map_data.append(line)
+     
 
 
     def load_data_c(self):
@@ -86,7 +93,7 @@ class Game:
             for line in f:
                 print(line)
                 self.map_data.append(line)
-     
+    
 
 # If the condition s is true, choose a different map file from the flag_maps folder
     # Lists all of the map files in the chosen folder
@@ -130,7 +137,9 @@ class Game:
                     print("a wall at", row, col)
                     Wall(self, col, row)
                 if tile == 'P':
+           
                     self.player = Player(self, col, row)
+                    
                 if tile == 'C':
                     Coin(self, col, row)
                 if tile == 'M':
@@ -165,7 +174,6 @@ class Game:
                     
                     
     def run(self):
-
         self.playing = True
         while self.playing:
             self.dt = self.clock.tick(FPS) / 1000
@@ -173,6 +181,17 @@ class Game:
             self.events()
             self.update()
             self.draw()
+            if self.s:  # Check if s is True
+                self.waves()
+            self.mob_spawn_time += self.dt
+            if self.player.hitpoints <= 0:
+            # If the player is dead, set playing to False to exit the game loop
+                self.player_death_time = pg.time.get_ticks() / 1000
+                self.draw()
+                self.playing = False
+
+                
+            
     
 
                    
@@ -201,59 +220,50 @@ class Game:
         text_rect = text_surface.get_rect()
         text_rect.midtop = (x,y)
         surface.blit(text_surface, text_rect)
+ 
+    
 
 
     def draw(self):
+      
+        self.screen.fill(BGCOLOR)
+
+        self.all_sprites.draw(self.screen)
+
+        self.draw_text(self.screen, str(self.cooldown.current_time), 24, WHITE, WIDTH/2 - 32, 2)
+        self.draw_text(self.screen, str(self.cooldown.event_time), 24, WHITE, WIDTH/2 - 32, 80)
+        self.draw_text(self.screen, str(self.cooldown.get_countdown()), 24, WHITE, WIDTH/2 - 32, 120)
+        self.draw_text(self.screen, str(self.player.hitpoints), 100, GREEN, WIDTH/2 - 400, 0)
+       
+        if self.player.hitpoints == 30:
+            self.draw_text(self.screen, str(self.player.hitpoints), 100, RED, WIDTH/2 - 400, 0)
+        if self.c:
+            self.draw_text(self.screen, str(self.player.coin_count), 100, YELLOW, WIDTH/2 - -400, 600)
+            self.draw_text(self.screen, str("Coins"), 100, YELLOW, WIDTH/2 - -200, 600)
+    
+
+        
+
+        
+
+        if self.player.coin_count == 5:
             self.screen.fill(BGCOLOR)
+            self.draw_text(self.screen, "You win!", 100, WHITE, WIDTH/2, HEIGHT/2)
+        if self.s and self.player.hitpoints == 0 and self.player_death_time is not None:
+         
+            self.screen.fill(BGCOLOR)
+            self.draw_text(self.screen, f"Time of death (Seconds): {self.player_death_time}", 24, WHITE, WIDTH/2 - 32, 80)
 
           
-            self.all_sprites.draw(self.screen)
-    
-            self.draw_text(self.screen, str(self.cooldown.current_time), 24, WHITE, WIDTH/2 - 32, 2)
-            self.draw_text(self.screen, str(self.cooldown.event_time), 24, WHITE, WIDTH/2 - 32, 80)
-            self.draw_text(self.screen, str(self.cooldown.get_countdown()), 24, WHITE, WIDTH/2 - 32, 120)
-            self.draw_text(self.screen, str(self.player.hitpoints), 100, WHITE, WIDTH/2 - 400, 0)
-            
-            self.draw_text(self.screen, str(), 100, WHITE, WIDTH/2 - 400, 0)
-            
-    
-            
-            #Health symbol featured here
-            #Coordines are 400,0
-             #Changes color (green) based on health of the player in the elif statment if self.hitpoints is equal to or greater than 51.
-            if self.player.hitpoints >= 51:
-                self.draw_text(self.screen, str(self.player.hitpoints), 100, GREEN, WIDTH/2 - 400, 0)
-            elif self.player.hitpoints <= 50:
-                #Changes color (yellow) based on health of the player in the elif statment if self.hitpoints is less than or equal to 50.
-                self.draw_text(self.screen, str(self.player.hitpoints), 100, YELLOW, WIDTH/2 - 400, 0)
-                    #Changes color (red) based on health of the player in the elif statment if self.hitpoints is less than or equal to 30, gives a low health warning.
-            if self.player.hitpoints <= 30:  
-                self.draw_text(self.screen, str(self.player.hitpoints), 100, RED, WIDTH/2 - 400, 0)
-                self.draw_text(self.screen, str("Warning, Low Health"), 100, RED, WIDTH/2 - -100, 0)
-             #Checks if collect the coin is running, displays the coin count
-            if self.c == True:
-                self.draw_text(self.screen, str(self.player.coin_count), 100, YELLOW, WIDTH/2 - -400, 600)
-            #Displays # of coins collected
-                self.draw_text(self.screen, str("Coins"), 100, YELLOW, WIDTH/2 - -200, 600)
-            if self.s == True:
-                self.draw_text(self.screen, str(waves), 100, GREEN, WIDTH/2 - 400, 0)
-            #Checks if coin count is 5, then displays the screen
-            if self.player.coin_count == 5:
-                self.screen.fill(BGCOLOR)
-                 #Displays "you win! here"
-                self.draw_text(self.screen, "You win!", 100, WHITE, WIDTH/2, HEIGHT/2)
-            if self.places == 0:
-                self.screen.fill(BGCOLOR)
-                self.draw_text(self.screen, "You died!", 100, WHITE, WIDTH/2, HEIGHT/2)
-            if self.s == True:
-                self.draw_text(self.screen, str("waves"), 100, YELLOW, WIDTH/2 - -200, 600)
+
+ 
 
 
             #Displays when coin count is 5
         
            
             #Displays the player health here.
-            pg.display.flip()
+        pg.display.flip()
     def events(self):
          for event in pg.event.get():
             if event.type == pg.QUIT:
@@ -269,7 +279,7 @@ class Game:
             #         self.player.move(dy=1)
 
     def menu(self):
-
+        self.player_death_time = None
         #Menu is displayed
         #Lines of code from 226-260 were copied from Chaptgpt and modified
         menu_displayed = True
@@ -278,7 +288,7 @@ class Game:
             #Draws the gamemodes
             self.draw_text(self.screen, "Choose an option:", 24, WHITE, WIDTH/2, HEIGHT/2 - 50)
             self.draw_text(self.screen, "C - Collect the Coins", 24, WHITE, WIDTH/2, HEIGHT/2)
-            self.draw_text(self.screen, "W - Enemy Waves", 24, WHITE, WIDTH/2, HEIGHT/2 + 50)
+            self.draw_text(self.screen, "W - Apocalypse Mode, For how many seconds can you survive!", 24, WHITE, WIDTH/2, HEIGHT/2 + 50)
          
       
             pg.display.flip()
@@ -289,10 +299,11 @@ class Game:
                 #Checks the key that the user chooses, will run the gamemode method if true
                 elif event.type == pg.KEYDOWN:
                     if event.key == pg.K_c:
-                        #menu_displayed = False
+                        menu_displayed = False
                         self.collect_the_coin()
                         self.c == True
                         self.s == False
+                    
                         self.new()
                         self.run()
                     
@@ -300,7 +311,7 @@ class Game:
                     
                 #Checks the key that the user chooses, will run the gamemode method if true     
                     if event.key == pg.K_w:
-                        #menu_displayed = False
+                        menu_displayed = False
                         self.waves()
                         self.s == True  # Set self.s to True for flag_maps selection
                         self.c == False
@@ -309,13 +320,8 @@ class Game:
                         self.run()
                         
                         
-                        if self.mobc.death_count <= 0:
-        # Save the current wave number before resetting the game
-                            waves += 1
-    # Reset the game
-                            self.new()
-                            if self.player.hitpoints < 1:
-                                self.playing = False
+                        
+                     
 
                         
                 #Checks the key that the user chooses, will run the gamemode method if true
@@ -335,12 +341,45 @@ class Game:
         
 
     def waves(self):
-        self.s == True
+        self.s = True
         self.load_data_w()
+    
+    # Set a suitable spawn interval (for example, 5 seconds)
+        spawn_interval = 5
+    
+    # Check if it's time to spawn mobs
+        if self.mob_spawn_time >= spawn_interval:
+            for i in range(self.mob_wave):
+            # Choose a random position until a valid one is found
+                valid_position = False
+                while not valid_position:
+                    mob_x = randint(0, WIDTH // TILESIZE - 1)
+                    mob_y = randint(0, HEIGHT // TILESIZE - 1)
+                # Check if the chosen position is not a wall
+                    if not any(isinstance(sprite, Wall) for sprite in self.all_sprites if sprite.rect.collidepoint(mob_x * TILESIZE, mob_y * TILESIZE)):
+                        valid_position = True
+                Mobc(self, mob_x, mob_y)
+        
+        # Increase the wave number
+            self.mob_wave += 1
+        
+        # Reset the mob spawn time
+            self.mob_spawn_time = 0
+    
+    # Update the mob spawn time
+   
+        self.mob_spawn_time += self.dt
+        
+
+ 
+
+
+        
+      
+
         
         
-        if waves == 28:
-            self.quit()
+       
         
      
         
@@ -348,7 +387,7 @@ class Game:
         
         
 
-waves = 0
+
 
 
 
