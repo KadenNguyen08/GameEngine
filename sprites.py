@@ -6,6 +6,7 @@ from utils import *
 from random import choice
 import math
 from os import path
+from pygame.math import Vector2 as vec
 
 
 
@@ -77,13 +78,14 @@ class Player(pg.sprite.Sprite):
         self.moneybag = 0
         self.speed = 300
         self.status = ""
-        self.hitpoints = 100
+        self.hitpoints = 10000
         self.cooling = False
         #sets the initial value of coin_count
         self.coin_count = 0
         self.pos = vec(0,0)
         print(self.hitpoints)
         self.lives = 5
+        
     
         
 
@@ -183,7 +185,7 @@ class Player(pg.sprite.Sprite):
                 #adds 300 to player speed
                 self.speed += 300
             if str(hits[0].__class__.__name__) == "Bullet":
-                self.hitpoints -= 25
+                self.hitpoints -= 1
                 #Adds 50 points to player health if player collides
    
 
@@ -243,8 +245,8 @@ class Player(pg.sprite.Sprite):
 
         
 class PewPew(pg.sprite.Sprite):
-    def __init__(self, game, x, y, ):
-        self.groups = game.all_sprites, game.pew_pews
+    def __init__(self, game, x, y):
+        self.groups = game.all_sprites, game.pew_pews  # Add game.pew_pews group here
         pg.sprite.Sprite.__init__(self, self.groups)
         self.game = game
         self.image = pg.Surface((TILESIZE/4, TILESIZE/4))
@@ -466,15 +468,17 @@ class Mob2(pg.sprite.Sprite):
         self.flag_count = 0
         self.speed = 150
         self.chasing = False
+        self.deaths = 28
+        #keeps track of deaths
 
 
-
+#Code from Mob2
     def sensor(self):
         if abs(self.rect.x - self.game.player.rect.x) < self.chase_distance and abs(self.rect.y - self.game.player.rect.y) < self.chase_distance:
             self.chasing = True
         else:
             self.chasing = False
-
+#Code from Mob2
     def update(self):
         self.sensor()
         if self.chasing:
@@ -492,14 +496,14 @@ class Mob2(pg.sprite.Sprite):
 
          ##print debug when mobc killed
         if self.mob2hitpots <= 0:
-                self.kill()
-                print("Mobc was killed")
+            self.kill()
+            print("Mobc was killed")
 
     def collide_with_group_mob2(self, group, kill):
         hits = pg.sprite.spritecollide(self, group, kill)
         if hits:
             if str(hits[0].__class__.__name__) == "PewPew":
-                self.mob2hitpots -= 1
+                self.mob2hitpots -= 100
 
 
 
@@ -527,26 +531,6 @@ class Bullet(pg.sprite.Sprite):
         self.rect.x += self.velocity.x
         self.rect.y += self.velocity.y
      
-
-
-class Bullett(pg.sprite.Sprite):
-    def __init__(self, game, x, y, direction):
-        self.groups = game.all_sprites, game.ammo
-        pg.sprite.Sprite.__init__(self, self.groups)
-        self.game = game
-        self.image = pg.Surface((TILESIZE/4, TILESIZE/4))
-        self.image.fill(RED)
-        self.rect = self.image.get_rect()
-        self.rect.center = (x, y)
-        self.direction = direction
-        self.speed = 10
-        #Defeins velocity
-        self.velocity = self.direction * self.speed
-
-    def update(self):
-      #Updates coordinates  
-        self.rect.x += self.velocity.x
-        self.rect.y += self.velocity.y
 
 
             
@@ -583,6 +567,7 @@ class Turret(pg.sprite.Sprite):
             Bullet(self.game, self.rect.centerx, self.rect.centery, direction)
             #allows the turret to track time since shooting
             self.last_fire = now
+waves = 0
 class Mobc(pg.sprite.Sprite):
     def __init__(self, game, x, y):
         self.groups = game.all_sprites, game.mobs
@@ -606,13 +591,18 @@ class Mobc(pg.sprite.Sprite):
         self.last_fire = pg.time.get_ticks()
         self.rect.x = x * TILESIZE
         self.rect.y = y * TILESIZE
+        #Keeps track of deaths
+        self.death_count = 28
 
-
+ 
     def sensor(self):
-        if abs(self.rect.x - self.game.player.rect.x) < self.chase_distance and abs(self.rect.y - self.game.player.rect.y) < self.chase_distance:
+        player_distance = abs(self.rect.x - self.game.player.rect.x) + abs(self.rect.y - self.game.player.rect.y)
+    
+        if player_distance < self.chase_distance:
             self.chasing = True
         else:
             self.chasing = False
+
 
     def update(self):
         self.sensor()
@@ -625,10 +615,11 @@ class Mobc(pg.sprite.Sprite):
             self.pos += self.vel * self.game.dt + 0.5 * self.acc * self.game.dt ** 2
             collide_with_walls(self, self.game.walls, 'x')
             collide_with_walls(self, self.game.walls, 'y')
-            self.collide_with_group(self.game.pew_pews, True)
+            self.collide_with_group(self.game.pew_pews, False)
             #flag_hits = pg.sprite.spritecollide(self, self.game.flags, False)
             if self.mob2hitpots == 0:
                 self.die()
+                self.kill()
 
         now = pg.time.get_ticks()
         #calculates the time that has passed since the last bullet was fired, fires another bullet if the time that has 
@@ -649,15 +640,51 @@ class Mobc(pg.sprite.Sprite):
         hits = pg.sprite.spritecollide(self, group, kill)
         if hits:
             if str(hits[0].__class__.__name__) == "PewPew":
+
                 self.mob2hitpots -= 100
+ 
                 #Adds to coin score
     def die(self):
         for group in self.groups:
             group.remove(self)
+            self.death_count -= 1
+     
 
 
 
-    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

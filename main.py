@@ -46,42 +46,59 @@ class Game:
         self.playing = True
       
     def load_data(self):
+        
         self.game_folder = path.dirname(__file__)
         self.img_folder = path.join(self.game_folder, 'images')
         self.cactus_img = pg.image.load(path.join(self.img_folder, 'cactus.png')).convert_alpha()
         self.healthbox_img = pg.image.load(path.join(self.img_folder, 'red.png')).convert_alpha()
         self.speedboost_img = pg.image.load(path.join(self.img_folder, 'speed.png')).convert_alpha()
         self.turret_img = pg.image.load(path.join(self.img_folder, 'turret.png')).convert_alpha()
-   
+        self.s = False
+        self.c = False
         self.map_data = []
-        '''
-        The with statement is a context manager in Python. 
-        It is used to ensure that a resource is properly closed or released 
-        after it is used. This can help to prevent errors and leaks.
-        '''
-        #defines map folder variable
-        map_folder = "Maps"
-        flag_map_folder = "flag_maps"
 
-# Lists all of the map files in the folder, Copied from Chatgpt, modified
+        if self.s == True:
+            self.load_data_w()
+        if self.c == True:
+            self.load_data_c()
+    
+        
+        # Define the default map folder
+
+        
+    def load_data_w(self):
+        
+        map_folder = "Flag_Maps"
         map_files = [f for f in os.listdir(map_folder) if os.path.isfile(os.path.join(map_folder, f))]
-        flag_map_files = [f for f in os.listdir(flag_map_folder) if os.path.isfile(os.path.join(flag_map_folder, f))]
-
-# Randomly chooses a map Copied from Chatgpt, modified
-        random_map_file = random.choice(map_files)
-        random_flag_map_file = random.choice(map_files)
-
-# Opens the random map file, Copied from Chatgpt, modified
-        with open(os.path.join(map_folder, random_map_file), 'rt') as f:
+        map_file_name = random.choice(map_files)
+        with open(os.path.join(map_folder, map_file_name), 'rt') as f:
             for line in f:
                 print(line)
                 self.map_data.append(line)
-            def test_method(self):
-                print("I can be called from Sprites...")
 
+
+    def load_data_c(self):
+        
+        map_folder = "Maps"
+        map_files = [f for f in os.listdir(map_folder) if os.path.isfile(os.path.join(map_folder, f))]
+        map_file_name = random.choice(map_files)
+        with open(os.path.join(map_folder, map_file_name), 'rt') as f:
+            for line in f:
+                print(line)
+                self.map_data.append(line)
+     
+
+# If the condition s is true, choose a different map file from the flag_maps folder
+    # Lists all of the map files in the chosen folder
+ 
+            
+
+            
+ 
 
     def new(self):
-     
+      
+        
 
         self.cooldown = Timer(self)
         print("create new game...")
@@ -89,7 +106,6 @@ class Game:
         self.walls = pg.sprite.Group()
         self.coins = pg.sprite.Group()
         self.mobs = pg.sprite.Group()
-        self.pew_pews = pg.sprite.Group()
         self.power_ups = pg.sprite.Group()
         self.power_up2 = pg.sprite.Group()
         self.cactus = pg.sprite.Group()
@@ -97,9 +113,12 @@ class Game:
         self.turret = pg.sprite.Group()
         self.bullets = pg.sprite.Group()
         self.mob_spawner = pg.sprite.Group()
-     
+    
+       # self.spawners = pg.sprite.Group()
+        
+        self.pew_pews = pg.sprite.Group()
         #self.team = pg.sprite.Group()
-        self.ammo = pg.sprite.Group
+        self.ammo = pg.sprite.Group()
         # self.player1 = Player(self, 1, 1)
         # for x in range(10, 20):
         #     Wall(self, x, 5)
@@ -127,7 +146,10 @@ class Game:
                 if tile == 'S':
                     SpeedBoost(self, col, row)
                 if tile == 'T':
-                    Turret(self,col,row)
+                    Turret(self, col, row)
+         
+  
+
 
                 if tile == 'A':
                     self.mobc = Mobc(self, col, row)
@@ -151,6 +173,7 @@ class Game:
             self.events()
             self.update()
             self.draw()
+    
 
                    
                 
@@ -179,7 +202,7 @@ class Game:
         text_rect.midtop = (x,y)
         surface.blit(text_surface, text_rect)
 
-    
+
     def draw(self):
             self.screen.fill(BGCOLOR)
 
@@ -190,10 +213,10 @@ class Game:
             self.draw_text(self.screen, str(self.cooldown.event_time), 24, WHITE, WIDTH/2 - 32, 80)
             self.draw_text(self.screen, str(self.cooldown.get_countdown()), 24, WHITE, WIDTH/2 - 32, 120)
             self.draw_text(self.screen, str(self.player.hitpoints), 100, WHITE, WIDTH/2 - 400, 0)
-            self.draw_text(self.screen, str(self.mobc.mob2hitpots), 100, WHITE, WIDTH/2 - 300, 0)
+            
             self.draw_text(self.screen, str(), 100, WHITE, WIDTH/2 - 400, 0)
             
-  
+    
             
             #Health symbol featured here
             #Coordines are 400,0
@@ -208,10 +231,12 @@ class Game:
                 self.draw_text(self.screen, str(self.player.hitpoints), 100, RED, WIDTH/2 - 400, 0)
                 self.draw_text(self.screen, str("Warning, Low Health"), 100, RED, WIDTH/2 - -100, 0)
              #Checks if collect the coin is running, displays the coin count
-            if self.collect_the_coin:
+            if self.c == True:
                 self.draw_text(self.screen, str(self.player.coin_count), 100, YELLOW, WIDTH/2 - -400, 600)
             #Displays # of coins collected
                 self.draw_text(self.screen, str("Coins"), 100, YELLOW, WIDTH/2 - -200, 600)
+            if self.s == True:
+                self.draw_text(self.screen, str(waves), 100, GREEN, WIDTH/2 - 400, 0)
             #Checks if coin count is 5, then displays the screen
             if self.player.coin_count == 5:
                 self.screen.fill(BGCOLOR)
@@ -220,6 +245,9 @@ class Game:
             if self.places == 0:
                 self.screen.fill(BGCOLOR)
                 self.draw_text(self.screen, "You died!", 100, WHITE, WIDTH/2, HEIGHT/2)
+            if self.s == True:
+                self.draw_text(self.screen, str("waves"), 100, YELLOW, WIDTH/2 - -200, 600)
+
 
             #Displays when coin count is 5
         
@@ -239,21 +267,7 @@ class Game:
             #         self.player.move(dy=-1)
             #     if event.key == pg.K_DOWN:
             #         self.player.move(dy=1)
-    def show_start_screen(self):
-        self.screen.fill(BGCOLOR)
-        self.draw_text(self.screen, "This is the start screen - press any key to play", 24, WHITE, WIDTH/2, HEIGHT/2)
-        pg.display.flip()
-        self.wait_for_key()
-    def wait_for_key(self):
-        waiting = True
-        while waiting:
-            self.clock.tick(FPS)
-            for event in pg.event.get():
-                if event.type == pg.QUIT:
-                    waiting = False
-                    self.quit()
-                if event.type == pg.KEYUP:
-                    waiting = False
+
     def menu(self):
 
         #Menu is displayed
@@ -264,8 +278,8 @@ class Game:
             #Draws the gamemodes
             self.draw_text(self.screen, "Choose an option:", 24, WHITE, WIDTH/2, HEIGHT/2 - 50)
             self.draw_text(self.screen, "C - Collect the Coins", 24, WHITE, WIDTH/2, HEIGHT/2)
-            self.draw_text(self.screen, "F - Capture the Flag", 24, WHITE, WIDTH/2, HEIGHT/2 + 50)
-            self.draw_text(self.screen, "T - Team Deathmatch", 24, WHITE, WIDTH/2, HEIGHT/2 + 100)
+            self.draw_text(self.screen, "W - Enemy Waves", 24, WHITE, WIDTH/2, HEIGHT/2 + 50)
+         
       
             pg.display.flip()
 
@@ -275,36 +289,66 @@ class Game:
                 #Checks the key that the user chooses, will run the gamemode method if true
                 elif event.type == pg.KEYDOWN:
                     if event.key == pg.K_c:
-                        menu_displayed = False
+                        #menu_displayed = False
+                        self.collect_the_coin()
+                        self.c == True
+                        self.s == False
                         self.new()
                         self.run()
-                        self.collect_the_coin()
+                    
+                        
                     
                 #Checks the key that the user chooses, will run the gamemode method if true     
-                    elif event.key == pg.K_f:
-                        self.capture_the_flag()
-                        menu_displayed = False
-                #Checks the key that the user chooses, will run the gamemode method if true
-                    elif event.key == pg.K_t:
-                    # Handle Team Deathmatsch option
-                        pass  # This is a placeholder, no gamemode here yet
+                    if event.key == pg.K_w:
+                        #menu_displayed = False
+                        self.waves()
+                        self.s == True  # Set self.s to True for flag_maps selection
+                        self.c == False
+                       
+                        self.new()
+                        self.run()
+                        
+                        
+                        if self.mobc.death_count <= 0:
+        # Save the current wave number before resetting the game
+                            waves += 1
+    # Reset the game
+                            self.new()
+                            if self.player.hitpoints < 1:
+                                self.playing = False
 
-                # The menu will exit if any keys be pressed
+                        
+                #Checks the key that the user chooses, will run the gamemode method if true
+             
                     else:
-                        menu_displayed = False
+                        print("""Wrong choice!               
+                              """)
+                        #g.quit()
+                        
             
            
         pg.display.flip()
     def collect_the_coin(self):
         #resets coin collection
-        self.player.coin_count = 0
+        self.load_data_c()
+        #self.player.coin_count = 0
         
 
-    def capture_the_flag(self):
-        pass
+    def waves(self):
+        self.s == True
+        self.load_data_w()
+        
+        
+        if waves == 28:
+            self.quit()
+        
+     
+        
+        # Set the wave number to the saved value
+        
+        
 
-    def team_deathmatch(self):
-        pass
+waves = 0
 
 
 
@@ -313,16 +357,16 @@ class Game:
         
 
 
-
  
     
 
 g = Game()
-g.show_start_screen()
+
 
 g.menu()
+
 while True:
-    
+
     g.new()
     g.run()
     g.all_sprites.update()
